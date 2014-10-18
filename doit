@@ -4,3 +4,5 @@ from subprocess import call
 
 if call(['setup.py', 'build_ext', '--inplace']) == 0:
     import song
+    #import synth as sy
+    #print sy.ps('E3 C4 D4 G4')
