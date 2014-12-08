@@ -2,5 +2,5 @@ build/
 *.swp
 *.pyc
 *.dll
-synth.c
+audio.c
 *.wav

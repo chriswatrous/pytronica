@@ -28,14 +28,27 @@ def sin_osc(double freq, double length):
     return clip
 
 
-def compose(clips_and_offsets):
-    clips_and_offsets = ((x, 0) if type(x) == np.ndarray else x for x in clips_and_offsets)
-    clips_and_offsets = ((clip, int(offset * srate)) for (clip, offset) in clips_and_offsets)
-    total_length = max(clip.size + offset for (clip, offset) in clips_and_offsets)
-    result = np.zeros(total_length)
-    for clip, offset in clips_and_offsets:
-        result[offset : offset + clip.size] += clip
-    return result
+#def compose(clips_and_offsets):
+    #clips_and_offsets = ((x, 0) if type(x) == np.ndarray else x for x in clips_and_offsets)
+    #clips_and_offsets = ((clip, int(offset * srate)) for (clip, offset) in clips_and_offsets)
+    #total_length = max(clip.size + offset for (clip, offset) in clips_and_offsets)
+    #result = np.zeros(total_length)
+    #for clip, offset in clips_and_offsets:
+        #result[offset : offset + clip.size] += clip
+    #return result
+
+
+def compose(A, B, offset=0):
+    offset = int(offset * srate)
+    if A == None:
+        new_clip = np.zeros(B.size)
+        new_clip[offset : B.size + offset] = B
+        return new_clip
+    else:
+        new_clip = np.zeros(max(A.size, B.size + offset))
+        new_clip[0 : A.size] = A
+        new_clip[offset : B.size + offset] += B
+        return new_clip
 
 
 def normalize(clip):

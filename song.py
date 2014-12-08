@@ -1,46 +1,92 @@
 #! /usr/bin/python
 
+from __future__ import division
+
 import os
+from subprocess import call
+
 import scipy.io.wavfile as wv
 import numpy as np
-from pdb import set_trace
-from subprocess import call
-import audio as au
-import arrange as ar
-from arrange import pitches as p
 
-#pitches = p('E3 C4 D4 F#4')
-#pitches = p('F#3 C4 D4 G4')
-#pitches = p('A2 E3 C4 D4 G4')
-#pitches = p('A1 E3 C4 D4 G4')
-#pitches = p('E1 B2 D4 F#4 A4')
-#pitches = p('Eb2 Bb3 C4 D4 G4')
-#pitches = p('A2 B3 C4 E4 G4')
-#pitches = p('D2 B3 C4 E4 G4')
-#pitches = p('A1 G3 B3 C4 D4')
-#pitches = p('D2 F3 G3 C4 E4')
-#pitches = p('D2 A2 E3 B3')
-#pitches = p('D2 A2 G3 B3 D4')
-#pitches = p('D2 A2 F3 G3 C4')
-#pitches = p('F2 G3 A3 C4 E4')
-#pitches = p('D2 A2 G3 C4 E4 F#4 B4 E5 A5 C6 E6 A6')
-#pitches = p('D2 A2')
-#pitches = [48, 50.4, 52.8, 55.2, 57.6]
-n = 12
-pitches = [48 + 12.0/n*x for x in range(n)]
+from audio import compose, normalize, simple_saw_osc, srate
+from arrange import pitches as p, ptof
 
-#pitches = p('D2 F3 G3 C4 E4|Eb2 Bb3 C4 D4 G4|E3 C4 D4 F#4|A2 E3 C4 D4 G4|E1 B2 D4 F#4 A4')
 
-freqs = (ar.ptof(x) for x in pitches)
+tempo = 200.0
+beat = 60.0 / tempo
 
-notes = (au.simple_saw_osc(x, 60) for x in freqs)
-clip = au.normalize(au.compose(notes))
-for pitch in pitches:
-    
 
-wv.write('out.wav', au.srate, clip) 
+def main():
+    clip = normalize(generate_clip())
+    wv.write('out.wav', srate, clip) 
 
-#devnull = open(os.devnull, 'w')
-#call(['/home/Chris/bin/vlc', 'out.wav'], stdout=devnull, stderr=devnull)
-#call(['audacity', 'out.wav'])
+    #devnull = open(os.devnull, 'w')
+    #call(['/home/Chris/bin/vlc', 'out.wav'], stdout=devnull, stderr=devnull)
+    #call(['audacity', 'out.wav'])
 
+
+def generate_clip():
+    #pitches = p('A2 B3 C4 E4 G4')
+    #pitches = p('F2 Ab3 C4 Eb4 G4')
+
+    chords = p('D2 F3 G3 C4 E4|Eb2 Bb3 C4 D4 G4|E3 C4 D4 F#4|A2 E3 C4 D4 G4|E1 B2 D4 F#4 A4')
+    #length = 2
+
+    #chords = [
+        #'D2 F3 G3 C4 E4',
+        #'Eb2 Bb3 C4 D4 G4',
+        #'A2 B3 C4 D4 G4',
+        #'E2 C#4 D4 F#4 A4',
+        #'F2 Ab3 Eb4 G4 Bb4',
+        #'C2 A3 Bb3 D4 F4 G4 C5',
+        #'C2 Bb3 Db4 E4 F#4 A4 C5',
+    #]
+    chords = [
+        'D2 A2 F#3',
+        'D2 Bb2 E3',
+        'D2 B2 F#3',
+        'D2 BB2 F3',
+        'D2 A2 F#3',
+        'D2 Bb2 E3',
+        'D2 B2 F#3',
+        'D2 BB2 F3',
+        'D2 A2 F#3',
+        'D2 Bb2 E3',
+        'D2 B2 F#3',
+        'D2 BB2 F3',
+    ]
+
+
+    clip = None
+    offset = 0
+    for notes in chords:
+        rhythm = [1/2, 1, 1/2, 3/2, 3/2, 1/2, 3/2]
+        s = 0.4
+        l = 1.25
+        durations = [s, s, s, s, l, s, s]
+        clip = compose(clip, pattern(notes, rhythm, durations, simple_saw_osc), offset)
+        offset += sum(rhythm) * beat
+    return clip
+
+
+def pattern(pitches, rhythm, durations, synth):
+    clip = None
+    offset = 0
+    for step, dur in zip(rhythm, durations):
+        clip = compose(clip, chord(pitches, dur * beat, synth), offset)
+        offset += beat * step
+    return clip
+
+
+def chord(pitches, length, synth):
+    if type(pitches) == str:
+        pitches = p(pitches)
+    clip = None
+    for pitch in pitches:
+        freq = ptof(pitch)
+        clip = compose(clip, synth(freq, length))
+    return clip
+
+
+if __name__ == '__main__':
+    main()
