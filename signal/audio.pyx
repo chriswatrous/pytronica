@@ -7,7 +7,7 @@ cdef double sample_rate = 48000
 cdef class Signal:
     cdef double *samples
 
-    cdef int generate(self):
+    cdef int generate(self) except -1:
         raise NotImplementedError
 
     def play(self):
@@ -37,13 +37,11 @@ cdef class Signal:
 
 
 cdef class BufferSignal(Signal):
-    def __init__(self):
-        Signal.__init__(self)
+    def __cinit__(self):
         self.samples = <double *>malloc(buffer_size * sizeof(double))
 
-    def __del__(self):
+    def __dealloc__(self):
         free(self.samples)
-        Signal.__del__(self)
 
 
 cdef class Saw(BufferSignal):
@@ -53,7 +51,7 @@ cdef class Saw(BufferSignal):
     cdef bint finite
 
     def __init__(self, freq, length=None, phase=0):
-        BufferSignal.__init__(self)
+        super(Saw, self).__init__(self)
 
         self.step = 2 * freq / sample_rate
 
@@ -67,7 +65,7 @@ cdef class Saw(BufferSignal):
             self.finite = False
 
 
-    cdef int generate(self):
+    cdef int generate(self) except -1:
         cdef int i, length
 
         if self.samples_left <= 0:

@@ -1,7 +1,9 @@
 #! /usr/bin/python
+import pyximport
+pyximport.install()
 
-from audio import Saw
+from audio import Saw, Signal
 
-s = Saw(220, 1)
+s = Saw(110, 1)
 s.play()
 
