@@ -23,7 +23,7 @@ cdef class Signal:
 
             for i in range(length):
                 sample = self.samples[i]
-                
+
                 if sample > 1:
                     sample = 1
 
@@ -31,7 +31,7 @@ cdef class Signal:
                     sample = -1
 
                 output_sample = <short>(sample * 0x7FFF)
-                
+
                 putchar(output_sample & 0xFF)
                 putchar((output_sample >> 8) & 0xFF)
 
@@ -83,5 +83,24 @@ cdef class Saw(BufferSignal):
                 self.value -= 2
 
         self.samples_left -= length
+
+        return length
+
+
+cdef class MulConst(BufferSignal):
+    cdef Signal child
+    cdef double amount
+
+    def __init__(self, child, amount):
+        self.child = child
+        self.amount = amount
+
+    cdef int generate(self) except -1:
+        cdef int i
+
+        cdef length = self.child.generate()
+
+        for i in range(length):
+            self.samples[i] = self.child.samples[i] * self.amount
 
         return length
