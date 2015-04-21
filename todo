@@ -18,6 +18,7 @@ To Do:
     Envelopes:
         AR
         ADSR
+        others
         arbitrary control signal
     Modifiers:
         Add
@@ -43,7 +44,7 @@ To Do:
     Combiners:
         AmpMod (multiply signals, total length is length of the shortest signal)
         Layer (adds sounds together at the same time, total length is length of the longest signal)
-        Compose (adds soudns together at different times)
+        Compose (adds sounds together at different times)
         Repeat (repeats a sound at regular intervals)
     Stereo:
         Pan
@@ -51,9 +52,11 @@ To Do:
         stereo reverb, chorus, phlanger, synths, etc.
     make sure all object can handle splitting and recombining of the signal paths
     in general all parameters should be able to take signals or constants as inputs
-
+    add comments / documentation
+    figure out how to kill a long song before it is done playing
 
 Doing:
-
+    Decay only envelop
 
 Done:
+    Layer (adds sounds together at the same time, total length is length of the longest signal)

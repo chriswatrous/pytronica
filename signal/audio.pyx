@@ -1,5 +1,6 @@
 from libc.stdlib cimport malloc, free
 from libc.stdio cimport putchar, fflush, stdout
+from libc.string cimport memset
 
 cdef int buffer_size = 1024
 cdef double sample_rate = 48000
@@ -68,10 +69,10 @@ cdef class Saw(BufferSignal):
     cdef int generate(self) except -1:
         cdef int i, length
 
-        if self.samples_left <= 0:
+        if self.finite and self.samples_left <= 0:
             return 0
 
-        if not self.finite and self.samples_left <= buffer_size:
+        if self.finite and self.samples_left <= buffer_size:
             length = self.samples_left
         else:
             length = buffer_size
@@ -87,20 +88,52 @@ cdef class Saw(BufferSignal):
         return length
 
 
-cdef class MulConst(BufferSignal):
-    cdef Signal child
+cdef class Mul(BufferSignal):
+    cdef Signal inp
     cdef double amount
 
-    def __init__(self, child, amount):
-        self.child = child
+    def __init__(self, inp, amount):
+        self.inp = inp
         self.amount = amount
 
     cdef int generate(self) except -1:
         cdef int i
 
-        cdef length = self.child.generate()
+        cdef length = self.inp.generate()
 
         for i in range(length):
-            self.samples[i] = self.child.samples[i] * self.amount
+            self.samples[i] = self.inp.samples[i] * self.amount
 
         return length
+
+
+cdef class Layer(BufferSignal):
+    cdef object inputs
+
+    def __init__(self, inputs):
+        self.inputs = inputs
+
+    cdef int generate(self) except -1:
+        cdef Signal inp
+        cdef int length, i
+        memset(self.samples, 0, buffer_size * sizeof(double))
+
+        done_signals = []
+        cdef int max_length = 0
+
+        for inp in self.inputs:
+            length = inp.generate()
+            
+            if length == 0:
+                done_signals.append(inp)
+
+            if length > max_length:
+                max_length = length
+
+            for i in range(length):
+                self.samples[i] += inp.samples[i]
+
+        for sig in done_signals:
+            self.inputs.remove(sig)
+
+        return max_length
