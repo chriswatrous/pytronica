@@ -1,6 +1,7 @@
 from libc.stdlib cimport malloc, free
 from libc.stdio cimport putchar, fflush, stdout
 from libc.string cimport memset
+from cpython.mem cimport PyMem_Malloc, PyMem_Free
 
 cdef int buffer_size = 1024
 cdef double sample_rate = 48000
@@ -39,10 +40,10 @@ cdef class Signal:
 
 cdef class BufferSignal(Signal):
     def __cinit__(self):
-        self.samples = <double *>malloc(buffer_size * sizeof(double))
+        self.samples = <double *>PyMem_Malloc(buffer_size * sizeof(double))
 
     def __dealloc__(self):
-        free(self.samples)
+        PyMem_Free(self.samples)
 
 
 cdef class Saw(BufferSignal):
