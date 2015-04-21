@@ -123,7 +123,7 @@ cdef class Layer(BufferSignal):
 
         for inp in self.inputs:
             length = inp.generate()
-            
+
             if length == 0:
                 done_signals.append(inp)
 
@@ -137,3 +137,47 @@ cdef class Layer(BufferSignal):
             self.inputs.remove(sig)
 
         return max_length
+
+
+cdef class AmpMod(BufferSignal):
+    cdef Signal inp1, inp2
+
+    def __init__(self, inp1, inp2):
+        self.inp1 = inp1
+        self.inp2 = inp2
+
+    cdef int generate(self) except -1:
+        cdef int length1, length2, length, i
+
+        length1 = self.inp1.generate()
+        length2 = self.inp2.generate()
+
+        if length1 == 0 or length2 == 0:
+            return 0
+
+        length = length1 if length1 > length2 else length2
+
+        for i in range(length):
+            self.samples[i] = self.inp1.samples[i] * self.inp2.samples[i]
+
+        return length
+
+
+cdef class DEnv(BufferSignal):
+    cdef double value, step
+
+    def __init__(self, half_life):
+        self.value = 1
+        self.step = 2**(-1 / sample_rate / half_life)
+
+    cdef int generate(self) except -1:
+        cdef int i
+
+        if self.value < 0.0003:
+            return 0
+
+        for i in range(buffer_size):
+            self.samples[i] = self.value
+            self.value *= self.step
+
+        return buffer_size

@@ -56,7 +56,8 @@ To Do:
     figure out how to kill a long song before it is done playing
 
 Doing:
-    Decay only envelop
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
+    Decay only envelop
+    AmpMod

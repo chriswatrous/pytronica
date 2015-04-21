@@ -4,7 +4,7 @@ pyximport.install()
 
 import re
 
-from audio import Saw, Mul, Layer
+from audio import Saw, Mul, Layer, AmpMod, DEnv
 
 
 def p2f(p):
@@ -25,13 +25,19 @@ def note(s):
 def notes(s):
     return [note(x) for x in s.split()]
 
+def note_freq(s):
+    return p2f(note(s))
 
-#ss = [Saw(p2f(x)) for x in [43, 57, 58, 62, 65]]
+
+ss = [Saw(p2f(x)) for x in [43, 57, 58, 62, 65]]
 def play_notes(s):
-    ss = [Saw(p2f(x), 1.5) for x in notes(s)]
-    Mul(Layer(ss), 0.25).play()
+    ss = [Saw(p2f(x)) for x in notes(s)]
+    Mul(AmpMod(Layer(ss), DEnv(0.5)), 0.25).play()
 
 play_notes('Ab2 Bb3 C4 Eb4 G4')
 play_notes('Gb2 Ab3 Bb3 Db4 F4')
 play_notes('A2 B3 C#4 E4 G#4')
 play_notes('B2 Db4 Eb4 Gb4 Bb4')
+
+#a = AmpMod(Saw(note_freq('Ab4')), DEnv(1))
+#a.play()
