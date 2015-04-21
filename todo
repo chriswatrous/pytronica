@@ -44,7 +44,6 @@ To Do:
     Combiners:
         AmpMod (multiply signals, total length is length of the shortest signal)
         Repeat (repeats a sound at regular intervals)
-        Compose (adds sounds together at different times)
     Stereo:
         Pan
         a class that takes a mono modifier and makes it stereo
@@ -53,6 +52,7 @@ To Do:
     in general all parameters should be able to take signals or constants as inputs
     add comments / documentation
     figure out how to kill a long song before it is done playing
+    split audio.pyx into multiple files, put songs in separate folder from lib
 
 Doing:
 
@@ -60,3 +60,4 @@ Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
     Decay only envelop
     AmpMod
+    Compose (adds sounds together at different times)
