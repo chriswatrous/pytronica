@@ -167,6 +167,8 @@ cdef class DEnv(BufferSignal):
     cdef double value, step
 
     def __init__(self, half_life):
+        if half_life <= 0:
+            raise ValueError('half_life must be a positive number')
         self.value = 1
         self.step = 2**(-1 / sample_rate / half_life)
 

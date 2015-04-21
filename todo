@@ -43,9 +43,8 @@ To Do:
         filters that can take signals as their input parameters
     Combiners:
         AmpMod (multiply signals, total length is length of the shortest signal)
-        Layer (adds sounds together at the same time, total length is length of the longest signal)
-        Compose (adds sounds together at different times)
         Repeat (repeats a sound at regular intervals)
+        Compose (adds sounds together at different times)
     Stereo:
         Pan
         a class that takes a mono modifier and makes it stereo
