@@ -1,0 +1,59 @@
+To Do:
+    Oscillators:
+        Square
+        Triangle
+        Sin
+        White Noise
+        Quality Saw
+        Quality Square
+        Quality Triangle
+    Synthesizers:
+        basic subtractive (standard analog modeling)
+        additive
+        FM
+        something like Absynth
+        something like Massive
+        that multi-saw synth I made in Reaktor
+        study synths in Reaktor and in FL Studio
+    Envelopes:
+        AR
+        ADSR
+        arbitrary control signal
+    Modifiers:
+        Add
+        MulAdd
+        MemoryDelay
+        ProcessDelay
+        Convolution
+        Reverb (algorithmic)
+        Interpolating Delay
+        Chorus
+        Phlanger
+        change name of MulConst to just Mul
+        delay with feedback
+    Filters:
+        1 pole low pass
+        1 pole high pass
+        2 pole low pass
+        2 pole band pass
+        2 pole high pass
+        maybe biquad, which could be used to create any other type of filter
+        parametric EQ
+        filters that can take signals as their input parameters
+    Combiners:
+        AmpMod (multiply signals, total length is length of the shortest signal)
+        Layer (adds sounds together at the same time, total length is length of the longest signal)
+        Compose (adds soudns together at different times)
+        Repeat (repeats a sound at regular intervals)
+    Stereo:
+        Pan
+        a class that takes a mono modifier and makes it stereo
+        stereo reverb, chorus, phlanger, synths, etc.
+    make sure all object can handle splitting and recombining of the signal paths
+    in general all parameters should be able to take signals or constants as inputs
+
+
+Doing:
+
+
+Done:
