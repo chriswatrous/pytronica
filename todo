@@ -52,9 +52,9 @@ To Do:
     in general all parameters should be able to take signals or constants as inputs
     add comments / documentation
     figure out how to kill a long song before it is done playing
-    split audio.pyx into multiple files, put songs in separate folder from lib
 
 Doing:
+    split audio.pyx into multiple files, put songs in separate folder from lib
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
