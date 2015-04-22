@@ -1,10 +1,7 @@
 #! /usr/bin/python
-import pyximport
-pyximport.install()
-
 import re
 
-from audio import Saw, Mul, Layer, AmpMod, DEnv, Compose
+from audio import Saw, Mul, Layer, AmpMod, ExpDecay, Compose
 
 
 def p2f(p):
@@ -29,7 +26,7 @@ def note_freq(s):
 
 def play_notes(s):
     ss = [Saw(p2f(x)) for x in notes(s)]
-    return AmpMod(Layer(ss), DEnv(0.4))
+    return AmpMod(Layer(ss), ExpDecay(0.4))
 
 #c = Compose()
 #delay = 0
@@ -38,7 +35,7 @@ def play_notes(s):
     #c.add(play_notes(s), delay)
     #delay += step
 
-#a = AmpMod(Saw(note_freq('Ab4')), DEnv(1))
+#a = AmpMod(Saw(note_freq('Ab4')), ExpDecay(1))
 #a.play()
 
 adj = 0.1
@@ -47,7 +44,7 @@ def osc(p):
     return Layer(ss)
 
 def synth(p):
-    return AmpMod(osc(p), DEnv(0.3))
+    return AmpMod(osc(p), ExpDecay(0.3))
 
 c = Compose()
 delay = 0
@@ -59,7 +56,7 @@ for p in notes('G3 C4 E4 C4 B4 E4 C4  A3 D4 F#4 D4 C5 F#4 D4') * 8:
     delay += step
 
 def synth2(p):
-    return AmpMod(Layer([osc(p), osc(p+7)]), DEnv(.5))
+    return AmpMod(Layer([osc(p), osc(p+7)]), ExpDecay(.5))
 
 c2 = Compose()
 delay = 0
@@ -89,7 +86,7 @@ c2.add(synth2(note('C2')), delay)
 
 def part3():
     def synth(p):
-        return AmpMod(osc(p), DEnv(0.1))
+        return AmpMod(osc(p), ExpDecay(0.1))
     c = Compose()
     ps = notes('F#3 G3 A3 C4 D4 F#4 G4 A4 C5 D5 F#5')
     ps = [ps[x] for x in [0, 1, 2, 3, 4, 3, 2, 3, 4, 5, 6, 5, 4, 5, 6, 7, 8, 7, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]]
