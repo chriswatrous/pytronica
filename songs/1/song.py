@@ -1,10 +1,6 @@
 #! /usr/bin/python
 
-from os.path import realpath, dirname, join
-import sys
-sys.path.append(join(dirname(realpath(__file__)), '../../signal'))
-
-from audio import p2f, note, Saw, AmpMod, ExpDecay, Mul, Layer
+from audio import *
 
 #adj = 0.1
 def osc(p):
