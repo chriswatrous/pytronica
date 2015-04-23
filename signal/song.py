@@ -1,28 +1,7 @@
 #! /usr/bin/python
 import re
 
-from audio import Saw, Mul, Layer, AmpMod, ExpDecay, Compose
-
-
-def p2f(p):
-    return 440 * 2**((p - 69)/12.0)
-
-note_names = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11}
-note_modifiers = {None: 0, 'b': -1, '#': 1}
-note_re = re.compile('([A-G])(b|#)?(-?\d+)')
-
-def note(s):
-    match = note_re.match(s)
-    if not match:
-        raise ArgumentException("Bad note spec '{}'".format(s))
-    letter, modifier, octave = match.groups()
-    return note_names[letter] + note_modifiers[modifier] + 12 + 12*int(octave)
-
-def notes(s):
-    return [note(x) for x in s.split()]
-
-def note_freq(s):
-    return p2f(note(s))
+from audio import *
 
 def play_notes(s):
     ss = [Saw(p2f(x)) for x in notes(s)]

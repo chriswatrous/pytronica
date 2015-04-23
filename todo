@@ -23,6 +23,7 @@ To Do:
     Modifiers:
         Add
         MulAdd
+        Take
         MemoryDelay
         ProcessDelay
         Convolution
@@ -51,8 +52,9 @@ To Do:
     make sure all object can handle splitting and recombining of the signal paths
     in general all parameters should be able to take signals or constants as inputs
     add comments / documentation
-    figure out how to kill a long song before it is done playing
     put songs in separate folder from lib
+    change design to allow for stereo
+    make "unit tests" that would play short sounds to test functionality
 
 Doing:
 
@@ -62,3 +64,4 @@ Done:
     AmpMod
     Compose (adds sounds together at different times)
     split audio.pyx into multiple files
+    call aplay from with the program; allow user to kill playback with ^C
