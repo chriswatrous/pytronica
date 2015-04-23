@@ -25,60 +25,89 @@ cdef class Signal:
     cdef int generate(self) except -1:
         raise NotImplementedError
 
+    cdef bint is_stereo(self):
+        return self.left != self.right
+
     def play(self):
         cdef int i, length, r1, r2
         cdef double sample
         cdef short output_sample
         cdef FILE *fifo
-        cdef bint exit_loop
+        cdef bint stereo
         cdef double clip_max = 0
 
+        stereo = self.is_stereo()
+
         try:
+            # Make the FIFO.
             fifo_name = '/tmp/fifo-' + str(randrange(1e9))
             call(['mkfifo', fifo_name])
-            cmd = ['aplay', '-f', 'S16_LE', '-c', '1', '-r', str(int(_sample_rate)), fifo_name]
+
+            # Start aplay.
+            channels = '2' if stereo else '1'
+            cmd = ['aplay', '-f', 'S16_LE', '-c', channels, '-r', str(int(_sample_rate)), fifo_name]
             player_proc = Popen(cmd)
+    
+            # The FIFO must be opened after aplay is started.
             fifo = fopen(fifo_name, 'w')
+
+            # Write the samples to the FIFO.
             while True:
                 length = self.generate()
-
                 if length == 0:
                     break
+                if stereo:
+                    for i in range(length):
+                        put_sample(self.left[i], fifo, &clip_max)
+                        put_sample(self.right[i], fifo, &clip_max)
+                else:
+                    for i in range(length):
+                        put_sample(self.left[i], fifo, &clip_max)
 
-                for i in range(length):
-                    sample = self.samples[i]
-
-                    if sample > 1:
-                        clip_max = dmax(clip_max, sample)
-                        sample = 1
-
-                    if sample < -1:
-                        clip_max = dmax(clip_max, -sample)
-                        sample = -1
-
-                    output_sample = <short>(sample * 0x7FFF)
-
-                    # These checks are needed in case the user kills the audio player before the
-                    # song is done.
-                    r1 = putc(output_sample & 0xFF, fifo)
-                    r2 = putc((output_sample >> 8) & 0xFF, fifo)
-                    exit_loop = r1 == EOF or r2 == EOF
-                    if exit_loop:
-                        break
-                if exit_loop:
-                    break
-
+            # aplay should receive an EOF and quit when the FIFO is closed.
             fclose(fifo)
             player_proc.wait()
+
         finally:
+            # Run even if the user kills with ^C.
+            if player_proc.poll == None:
+                player_proc.terminate()
+            call(['rm', fifo_name])
             if clip_max > 0:
                 print 'There was clipping. ({})'.format(clip_max)
-            call(['rm', fifo_name])
+
+
+cdef inline object put_sample(double sample, FILE *f, double *clip_max):
+    cdef short output_sample
+    cdef int r1, r2
+
+    if sample > 1:
+        clip_max[0] = dmax(clip_max[0], sample)
+        sample = 1
+
+    if sample < -1:
+        clip_max[0] = dmax(clip_max[0], -sample)
+        sample = -1
+
+    output_sample = <short>(sample * 0x7FFF)
+
+    r1 = putc(output_sample & 0xFF, f)
+    r2 = putc((output_sample >> 8) & 0xFF, f)
+
+    # putc may return EOF if the user kills aplay before the sound is done playing.
+    if r1 == EOF or r2 == EOF:
+        raise EOFError
 
 
 cdef class BufferSignal(Signal):
     def __cinit__(self):
-        self.samples = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
+        self.left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
+        self.right = self.left
+
+    cdef make_stereo(self):
+        self.right = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
 
     def __dealloc__(self):
-        PyMem_Free(self.samples)
+        if self.right != self.left:
+            PyMem_Free(self.right)
+        PyMem_Free(self.left)

@@ -18,7 +18,7 @@ cdef class ExpDecay(BufferSignal):
             return 0
 
         for i in range(BUFFER_SIZE):
-            self.samples[i] = self.value
+            self.left[i] = self.value
             self.value *= self.step
 
         return BUFFER_SIZE

@@ -53,9 +53,10 @@ To Do:
     in general all parameters should be able to take signals or constants as inputs
     add comments / documentation
     put songs in separate folder from lib
-    change design to allow for stereo
+    delay allocation of bufferes until needed, free when done
 
 Doing:
+    change design to allow for stereo
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)

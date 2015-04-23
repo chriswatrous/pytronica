@@ -38,4 +38,27 @@ class AudioTests(unittest.TestCase):
         c.play()
 
 
+    def test_pan(self):
+        def play(pan):
+            s = Mul(Saw(note_freq('C4'), .2), 0.25)
+            p = Pan(s, pan)
+            p.play()
+        for x in span(-1, 1, 9):
+            play(x)
+
+
+    def test_stereo_layer(self):
+        def synth(p, pan):
+            s = Mul(Saw(p2f(p)), 0.25)
+            a = AmpMod(s, ExpDecay(0.5))
+            #return a
+            return Pan(a, pan)
+        #ns = notes('Eb3 G3 Bb3 F4')
+        ns = notes('F3 Ab3 Db4 Eb4 G4 Bb4')
+        #ns = notes('Ab3 Eb4 Bb4 G4 Db4 F3')
+        pans = list(span(-.5, .5, len(ns)))
+        ss = [synth(ns[x], pans[x]) for x in range(len(ns))]
+        Layer(ss).play()
+
+
 unittest.main()

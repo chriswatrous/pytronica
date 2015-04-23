@@ -6,14 +6,28 @@ include "constants.pxi"
 
 cdef class Layer(BufferSignal):
     cdef object inputs
+    cdef bint stereo
 
     def __init__(self, inputs):
-        self.inputs = inputs
+        self.inputs = list(inputs)
+
+        self.stereo = False
+        cdef Signal sig
+        for sig in self.inputs:
+            if sig.is_stereo():
+                self.make_stereo()
+                self.stereo = True
+                break
+
 
     cdef int generate(self) except -1:
         cdef Signal inp
         cdef int length, i
-        memset(self.samples, 0, BUFFER_SIZE * sizeof(double))
+
+        # Clear the buffer(s).
+        memset(self.left, 0, BUFFER_SIZE * sizeof(double))
+        if self.stereo:
+            memset(self.right, 0, BUFFER_SIZE * sizeof(double))
 
         done_signals = []
         cdef int max_length = 0
@@ -27,8 +41,13 @@ cdef class Layer(BufferSignal):
             if length > max_length:
                 max_length = length
 
-            for i in range(length):
-                self.samples[i] += inp.samples[i]
+            if self.stereo:
+                for i in range(length):
+                    self.left[i] += inp.left[i]
+                    self.right[i] += inp.right[i]
+            else:
+                for i in range(length):
+                    self.left[i] += inp.left[i]
 
         for sig in done_signals:
             self.inputs.remove(sig)
@@ -55,6 +74,6 @@ cdef class AmpMod(BufferSignal):
         length = length1 if length1 > length2 else length2
 
         for i in range(length):
-            self.samples[i] = self.inp1.samples[i] * self.inp2.samples[i]
+            self.left[i] = self.inp1.left[i] * self.inp2.left[i]
 
         return length

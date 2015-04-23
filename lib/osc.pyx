@@ -6,7 +6,7 @@ include "constants.pxi"
 cdef class Saw(BufferSignal):
     cdef double step
     cdef double value
-    cdef long samples_left
+    cdef long remaining_samples
     cdef bint finite
 
     def __init__(self, freq, length=None, phase=0):
@@ -19,27 +19,27 @@ cdef class Saw(BufferSignal):
             self.value -= 2
         if length != None:
             self.finite = True
-            self.samples_left = length * self.sample_rate
+            self.remaining_samples = length * self.sample_rate
         else:
             self.finite = False
 
     cdef int generate(self) except -1:
         cdef int i, length
 
-        if self.finite and self.samples_left <= 0:
+        if self.finite and self.remaining_samples <= 0:
             return 0
 
-        if self.finite and self.samples_left <= BUFFER_SIZE:
-            length = self.samples_left
+        if self.finite and self.remaining_samples <= BUFFER_SIZE:
+            length = self.remaining_samples
         else:
             length = BUFFER_SIZE
 
         for i in range(length):
-            self.samples[i] = self.value
+            self.left[i] = self.value
             self.value += self.step
             if self.value > 1:
                 self.value -= 2
 
-        self.samples_left -= length
+        self.remaining_samples -= length
 
         return length

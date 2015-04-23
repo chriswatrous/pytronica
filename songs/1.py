@@ -77,6 +77,5 @@ def part3():
         delay += step / 2
     return c
 
-m = Mul(Layer([c, c2, part3()]), 0.1)
-#m = Mul(part3(), 0.15)
+m = Mul(Layer([c, c2, part3()]), 0.09)
 m.play()

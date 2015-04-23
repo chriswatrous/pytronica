@@ -70,7 +70,7 @@ cdef class Compose(BufferSignal):
             return 0
 
         # Zero out the buffer.
-        memset(self.samples, 0, BUFFER_SIZE * sizeof(double))
+        memset(self.left, 0, BUFFER_SIZE * sizeof(double))
 
         # Get the signals that will be starting this round.
         starting = set()
@@ -90,7 +90,7 @@ cdef class Compose(BufferSignal):
             if info not in starting:
                 length = info.length + info.offset - BUFFER_SIZE
                 for i in range(length):
-                    self.samples[i] += info.signal.samples[i + BUFFER_SIZE - info.offset]
+                    self.left[i] += info.signal.left[i + BUFFER_SIZE - info.offset]
                 total_length = imax(length, total_length)
 
             # Generate the signal.
@@ -102,7 +102,7 @@ cdef class Compose(BufferSignal):
             # Add the start of the generated signal to the end of the buffer.
             length = imin(info.length + info.offset, BUFFER_SIZE)
             for i in range(info.offset, length):
-                self.samples[i] += info.signal.samples[i - info.offset]
+                self.left[i] += info.signal.left[i - info.offset]
             total_length = imax(length, total_length)
 
         for x in done:

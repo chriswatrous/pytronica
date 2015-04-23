@@ -1,3 +1,4 @@
+from __future__ import division
 import re
 from math import log, log10
 
@@ -31,3 +32,11 @@ def note_freq(s):
 
 def note_freqs(s):
     return map(p2f, notes(s))
+
+def span(start, end, num):
+    step = (end - start) / (num - 1)
+    for n in range(num - 1):
+        yield start + n*step
+
+    # Yield end separately so there will be no loss of precision.
+    yield end
