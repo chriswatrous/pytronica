@@ -2,26 +2,26 @@ from libc.string cimport memset
 from collections import deque
 
 from sig cimport Signal, BufferSignal 
-from util cimport imin, imax
+from c_util cimport imin, imax
 
 include "constants.pxi"
 
 cdef class ComposeInfo:
     cdef Signal signal
-    cdef int start
+    cdef int start_frame
     cdef int offset
     cdef int length
 
-    def __cinit__(self, Signal signal, int start, int offset):
+    def __cinit__(self, Signal signal, int start_frame, int offset):
         self.signal = signal
-        self.start = start
+        self.start_frame = start_frame
         self.offset = offset
         self.length = 0
 
 
 cdef class Compose(BufferSignal):
     cdef object inputs, waiting, running
-    cdef int generate_count
+    cdef int frame_count
     cdef bint started
 
     def __init__(self, inputs=None):
@@ -31,13 +31,13 @@ cdef class Compose(BufferSignal):
             self.inputs = []
 
         self.started = False
-        self.generate_count = 0
+        self.frame_count = 0
 
     def add(self, signal, delay):
         self.inputs.append((signal, delay))
 
     cdef _prepare(self):
-        cdef int start, offset
+        cdef int start_frame, offset
         cdef Signal signal
         cdef double delay
 
@@ -49,9 +49,9 @@ cdef class Compose(BufferSignal):
         self.running = []
 
         for signal, delay in self.inputs:
-            start = <int>((delay * self.sample_rate) / BUFFER_SIZE)
-            offset = <int>((delay * self.sample_rate) - (start * BUFFER_SIZE))
-            self.waiting.append(ComposeInfo(signal, start, offset))
+            start_frame = <int>((delay * self.sample_rate) / BUFFER_SIZE)
+            offset = <int>((delay * self.sample_rate) - (start_frame * BUFFER_SIZE))
+            self.waiting.append(ComposeInfo(signal, start_frame, offset))
 
 
     cdef int generate(self) except -1:
@@ -78,7 +78,7 @@ cdef class Compose(BufferSignal):
             if len(self.waiting) == 0:
                 break
             info = self.waiting[0]
-            if info.start > self.generate_count:
+            if info.start_frame > self.frame_count:
                 break
             x = self.waiting.popleft()
             starting.add(x)
@@ -108,7 +108,7 @@ cdef class Compose(BufferSignal):
         for x in done:
             self.running.remove(x)
 
-        self.generate_count += 1
+        self.frame_count += 1
 
         if len(self.running) == 0 and len(self.waiting) == 0:
             return total_length

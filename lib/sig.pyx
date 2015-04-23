@@ -4,7 +4,7 @@ from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from subprocess import call, Popen
 from random import randrange
 
-from util cimport dmax
+from c_util cimport dmax
 
 include "constants.pxi"
 

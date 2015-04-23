@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 import pyximport
 pyximport.install()
 
@@ -8,3 +10,4 @@ from compose import Compose
 from envelopes import ExpDecay
 from combiners import Layer, AmpMod
 from modifiers import Mul
+import sig
