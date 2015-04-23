@@ -3,6 +3,8 @@ import re
 
 from audio import *
 
+#set_sample_rate(22000)
+
 def play_notes(s):
     ss = [Saw(p2f(x)) for x in notes(s)]
     return AmpMod(Layer(ss), ExpDecay(0.4))
@@ -75,6 +77,6 @@ def part3():
         delay += step / 2
     return c
 
-m = Mul(Layer([c, c2, part3()]), 0.15)
+m = Mul(Layer([c, c2, part3()]), 0.1)
 #m = Mul(part3(), 0.15)
 m.play()

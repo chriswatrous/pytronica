@@ -54,7 +54,6 @@ To Do:
     add comments / documentation
     put songs in separate folder from lib
     change design to allow for stereo
-    make "unit tests" that would play short sounds to test functionality
 
 Doing:
 
@@ -65,3 +64,7 @@ Done:
     Compose (adds sounds together at different times)
     split audio.pyx into multiple files
     call aplay from with the program; allow user to kill playback with ^C
+    make "unit tests" that would play short sounds to test functionality
+    make aplay exit properly
+    report clipping
+
