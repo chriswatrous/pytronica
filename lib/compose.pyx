@@ -1,3 +1,5 @@
+from __future__ import division
+
 from libc.string cimport memset
 from collections import deque
 
@@ -16,7 +18,7 @@ cdef class ComposeInfo:
         self.signal = signal
         self.start_frame = start_frame
         self.offset = offset
-        self.length = 0
+        self.length = -1
 
 
 cdef class Compose(BufferSignal):
@@ -33,8 +35,12 @@ cdef class Compose(BufferSignal):
         self.started = False
         self.frame_count = 0
 
-    def add(self, signal, delay):
+
+    def add(self, Signal signal, delay):
         self.inputs.append((signal, delay))
+        if signal.is_stereo() and not self.is_stereo():
+            self.make_stereo()
+
 
     cdef _prepare(self):
         cdef int start_frame, offset
@@ -58,9 +64,9 @@ cdef class Compose(BufferSignal):
         cdef ComposeInfo info
         cdef int i # used for loop iterators
         cdef int length # used for the loop terminator
-        cdef int total_length # the total number of samples in the buffer that were touch by any loop
+        cdef int frame_length # the total number of samples in the buffer that were touch by any loop
 
-        total_length = 0
+        cdef bint stereo = self.is_stereo()
 
         if not self.started:
             self._prepare()
@@ -69,29 +75,34 @@ cdef class Compose(BufferSignal):
         if len(self.running) == 0 and len(self.waiting) == 0:
             return 0
 
-        # Zero out the buffer.
+        # Zero out the buffer(s).
         memset(self.left, 0, BUFFER_SIZE * sizeof(double))
+        if stereo:
+            memset(self.right, 0, BUFFER_SIZE * sizeof(double))
 
-        # Get the signals that will be starting this round.
-        starting = set()
+        # Get the signals that will be starting this frame.
         while True:
             if len(self.waiting) == 0:
                 break
             info = self.waiting[0]
             if info.start_frame > self.frame_count:
                 break
-            x = self.waiting.popleft()
-            starting.add(x)
-            self.running.append(x)
+            self.running.append(self.waiting.popleft())
 
+        frame_length = 0
         done = []
         for info in self.running:
             # Add the end of the previously generated signal to the start of the buffer.
-            if info not in starting:
+            if info.length >= 0:
                 length = info.length + info.offset - BUFFER_SIZE
-                for i in range(length):
-                    self.left[i] += info.signal.left[i + BUFFER_SIZE - info.offset]
-                total_length = imax(length, total_length)
+                if stereo:
+                    for i in range(length):
+                        self.left[i] += info.signal.left[i + BUFFER_SIZE - info.offset]
+                        self.right[i] += info.signal.right[i + BUFFER_SIZE - info.offset]
+                else:
+                    for i in range(length):
+                        self.left[i] += info.signal.left[i + BUFFER_SIZE - info.offset]
+                frame_length = imax(length, frame_length)
 
             # Generate the signal.
             info.length = info.signal.generate()
@@ -101,9 +112,14 @@ cdef class Compose(BufferSignal):
 
             # Add the start of the generated signal to the end of the buffer.
             length = imin(info.length + info.offset, BUFFER_SIZE)
-            for i in range(info.offset, length):
-                self.left[i] += info.signal.left[i - info.offset]
-            total_length = imax(length, total_length)
+            if stereo:
+                for i in range(info.offset, length):
+                    self.left[i] += info.signal.left[i - info.offset]
+                    self.right[i] += info.signal.right[i - info.offset]
+            else:
+                for i in range(info.offset, length):
+                    self.left[i] += info.signal.left[i - info.offset]
+            frame_length = imax(length, frame_length)
 
         for x in done:
             self.running.remove(x)
@@ -111,6 +127,6 @@ cdef class Compose(BufferSignal):
         self.frame_count += 1
 
         if len(self.running) == 0 and len(self.waiting) == 0:
-            return total_length
+            return frame_length
         else:
             return BUFFER_SIZE

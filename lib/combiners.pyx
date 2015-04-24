@@ -6,31 +6,32 @@ include "constants.pxi"
 
 cdef class Layer(BufferSignal):
     cdef object inputs
-    cdef bint stereo
 
     def __init__(self, inputs):
+        cdef Signal sig
+
         self.inputs = list(inputs)
 
-        self.stereo = False
-        cdef Signal sig
+        # Make this object stereo if any of the inputs are stereo.
         for sig in self.inputs:
             if sig.is_stereo():
                 self.make_stereo()
-                self.stereo = True
                 break
 
 
     cdef int generate(self) except -1:
         cdef Signal inp
-        cdef int length, i
+        cdef int i, length, max_length
+
+        cdef bint stereo = self.is_stereo()
 
         # Clear the buffer(s).
         memset(self.left, 0, BUFFER_SIZE * sizeof(double))
-        if self.stereo:
+        if stereo:
             memset(self.right, 0, BUFFER_SIZE * sizeof(double))
 
         done_signals = []
-        cdef int max_length = 0
+        max_length = 0
 
         for inp in self.inputs:
             length = inp.generate()
@@ -41,7 +42,7 @@ cdef class Layer(BufferSignal):
             if length > max_length:
                 max_length = length
 
-            if self.stereo:
+            if stereo:
                 for i in range(length):
                     self.left[i] += inp.left[i]
                     self.right[i] += inp.right[i]

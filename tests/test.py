@@ -1,4 +1,5 @@
 #! /usr/bin/python
+from __future__ import division
 import unittest
 
 from audio import *
@@ -20,6 +21,7 @@ class AudioTests(unittest.TestCase):
             play_sound()
         finally:
             set_sample_rate(s)
+
 
     def test_audio_stuff(self):
         adj = 0.03
@@ -49,16 +51,33 @@ class AudioTests(unittest.TestCase):
 
     def test_stereo_layer(self):
         def synth(p, pan):
-            s = Mul(Saw(p2f(p)), 0.25)
-            a = AmpMod(s, ExpDecay(0.5))
-            #return a
+            s = Mul(Saw(p2f(p)), 0.20)
+            a = AmpMod(s, ExpDecay(2))
             return Pan(a, pan)
-        #ns = notes('Eb3 G3 Bb3 F4')
         ns = notes('F3 Ab3 Db4 Eb4 G4 Bb4')
-        #ns = notes('Ab3 Eb4 Bb4 G4 Db4 F3')
-        pans = list(span(-.5, .5, len(ns)))
+        pans = list(span(-1, 1, len(ns)))
         ss = [synth(ns[x], pans[x]) for x in range(len(ns))]
         Layer(ss).play()
 
+
+    def test_stereo_compose(self):
+        def synth(ps, pan):
+            ss = [Saw(p2f(x)) for x in ps]
+            a = AmpMod(Layer(ss), ExpDecay(0.3))
+            a = Mul(a, 0.3)
+            #return a
+            return Pan(a, pan)
+        
+        a = lambda: synth(notes('C3 G3 Eb4'), -.5)
+        b = lambda: synth(notes('Eb3 Bb3 F4'), .5)
+        step = 0.18
+        c = Compose()
+        c.add(a(), 0)
+        c.add(a(), 3*step)
+        c.add(b(), 7*step)
+        c.add(b(), 10*step)
+        c.play()
+
+    
 
 unittest.main()

@@ -52,8 +52,10 @@ To Do:
     make sure all object can handle splitting and recombining of the signal paths
     in general all parameters should be able to take signals or constants as inputs
     add comments / documentation
-    put songs in separate folder from lib
     delay allocation of bufferes until needed, free when done
+    overload arithmetic operators for signals
+    better note mini-language: '3 C D F A Ab C Eb -G' instead of 'C3 D3 F3 A3 Ab3 C4 Eb4 G3'
+    measure running time of all Signal classes and report as % of real time
 
 Doing:
     change design to allow for stereo

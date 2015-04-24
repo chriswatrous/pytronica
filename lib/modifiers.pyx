@@ -36,8 +36,23 @@ cdef class Pan(BufferSignal):
 
         self.inp = inp
 
-        self.left_gain = cos((1 + pan)*PI/4) * sqrt(2)
-        self.right_gain = cos((1 - pan)*PI/4) * sqrt(2)
+        # "Circualar" panning law. -3dB in the middle.
+        # This one sounds better than triangle.
+        #self.left_gain = cos((1 + pan)*PI/4) * sqrt(2)
+        #self.right_gain = cos((1 - pan)*PI/4) * sqrt(2)
+        
+        # "Triangle" panning law. -6dB in the middle
+        #self.left_gain = 1 - pan
+        #self.right_gain = 1 + pan
+
+        # 0 dB in the middle.
+        # This one sounds the best and is cheap.
+        if pan >= 0:
+            self.left_gain = 1 - pan
+            self.right_gain = 1
+        else:
+            self.left_gain = 1
+            self.right_gain = 1 + pan
 
     cdef int generate(self) except -1:
         cdef int i, length
