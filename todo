@@ -62,10 +62,8 @@ To Do:
     Signal method to write file (raw or wav)
     rename Layer -> Add
     get rid of Mul and AmpMod, replace with operator *
-    clean up unit tests
 
 Doing:
-    LinearDecay
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -79,3 +77,5 @@ Done:
     report clipping
     change design to allow for stereo
     overload arithmetic operators for signals
+    LinearDecay
+    clean up unit tests
