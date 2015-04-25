@@ -19,28 +19,17 @@ class AudioTests(unittest.TestCase):
             set_sample_rate(s)
 
     def test_stereo_layer(self):
-        def synth(p, pan):
-            s = .2 * Saw(p2f(p)) * LinearDecay(3)
-            return Pan(s, pan)
-        ns = notes('F3 Ab3 Db4 Eb4 G4 Bb4')
-        pans = list(span(-1, 1, len(ns)))
-        sum(synth(ns[x], pans[x]) for x in range(len(ns))).play()
+        f1, f2 = note_freqs('C4 E4')
+        a = Pan(Saw(f1, .5), -.5) + Pan(Saw(f2, .5), .5)
+        a *= .25
+        a.play()
 
     def test_stereo_compose(self):
-        def env():
-            return ExpDecay(0.3) * LinearDecay(2)
-        def synth(ps, pan):
-            a = 0.3 * sum(Saw(p2f(x)) for x in ps) * env()
-            return Pan(a, pan)
-        a = lambda: synth(notes('C3 G3 Eb4'), -.5)
-        b = lambda: synth(notes('Eb3 Bb3 F4'), .5)
-        step = 0.18
+        f1, f2 = note_freqs('C4 E4')
         c = Compose()
-        c.add(a(), 0)
-        c.add(a(), 3*step)
-        c.add(b(), 7*step)
-        c.add(b(), 10*step)
-        c.play()
+        c.add(Pan(Saw(f1, .5), -.5), 0)
+        c.add(Pan(Saw(f2, .5), .5), .5)
+        (.25 * c).play()
 
     # Users might expect the Mul to be stereo even if the compose becomes stereo after
     # it is hooked up to the Mul.

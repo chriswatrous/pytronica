@@ -86,27 +86,21 @@ cdef class Multiply(BufferSignal):
         cdef Signal sig
 
         inputs = []
-
         self.constant_factor = 1
-
-        if issubclass(type(inp1), Signal):
-            inputs.append(inp1)
-        else:
-            self.constant_factor = inp1
-
-        if issubclass(type(inp2), Signal):
-            inputs.append(inp2)
-        else:
-            self.constant_factor = inp2
+        for inp in [inp1, inp2]:
+            if issubclass(type(inp), Signal):
+                inputs.append(inp)
+            else:
+                self.constant_factor = inp
 
         if len(inputs) == 0:
             raise TypeError('At least one input must be a Signal.')
 
-        self.inp1 = inputs[0]
-        if len(inputs) == 1:
-            self.inp2 = None
+        if len(inputs) == 2:
+            self.inp1, self.inp2 = inputs
         else:
-            self.inp2 = inputs[1]
+            self.inp1 = inputs[0]
+            self.inp2 = None
 
         for sig in inputs:
             if sig.is_stereo():

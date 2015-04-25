@@ -64,6 +64,8 @@ To Do:
     get rid of Mul and AmpMod, replace with operator *
     add helper methods to Signal that would allow code like this: Saw(220).pan(-.5) + Saw(221).pan(.5)
     FadeOut
+    operator subtract
+    operator divide for dividing by constants
 
 Doing:
 

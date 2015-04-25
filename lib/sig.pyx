@@ -41,6 +41,9 @@ cdef class Signal:
     def __rmul__(self, other):
         return Multiply(self, other)
 
+    #def __sub__(self, other):
+        #return
+
     def play(self):
         cdef int i, length, r1, r2
         cdef double sample
@@ -111,11 +114,11 @@ cdef class Signal:
         if r1 == EOF or r2 == EOF:
             raise EOFError
 
-    cdef void report_clipping(self, double s):
-        if s < 0:
-            s *= -1
-        if s > self.clip_max:
-            self.clip_max = s
+    cdef void report_clipping(self, double sample):
+        if sample < 0:
+            sample *= -1
+        if sample > self.clip_max:
+            self.clip_max = sample
             print 'Clipping! ({})'.format(self.clip_max)
 
 
