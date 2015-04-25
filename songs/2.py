@@ -9,15 +9,16 @@ from audio import *
     #os = [osc1(p+x) for x in [0, 12.03, 7-.03]]
     #return Layer(os)
 
+def saw(p):
+    return Saw(p2f(p))
+
 a = .5
+
 def osc(p):
-    return Layer([
-        Pan(Mul(Saw(p2f(p)), .25), -a),
-        Pan(Mul(Saw(p2f(p+.05)), .25), a)
-        ])
+    return Pan(saw(p), -a) + Pan(saw(p+.1), a)
 
 def synth(p):
-    #return AmpMod(osc(p), ExpDecay(5))
-    return osc(p)
+    return osc(p) * ExpDecay(1)
 
-synth(note('C4')).play()
+s = .25 * synth(note('C4'))
+s.play()

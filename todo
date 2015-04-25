@@ -60,6 +60,7 @@ To Do:
     rename Layer to Add
     make Layer like class called Mul to replace existing Mul and AmpMod
     Signal method to write file (raw or wav)
+    clean up unit tests
 
 Doing:
     overload arithmetic operators for signals

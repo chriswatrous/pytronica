@@ -102,23 +102,19 @@ class AudioTests(unittest.TestCase):
 
 
 class OperatorTests(unittest.TestCase):
-    def test_add_signals(self):
-        def synth(n):
-            o = Saw(note_freq(n))
-            return AmpMod(o, ExpDecay(.2))
+    def test_multiply(self):
         c = Compose()
-        c.add(synth('A3') + synth('C4') + synth('E4'), 0)
-        c.add((synth('A3') + synth('C4')) + synth('E4'), .5)
-        c.add(synth('A3') + (synth('C4') + synth('E4')), 1)
-        Mul(c, 0.4).play()
+        c.add(.25 * Saw(note_freq('A3')) * ExpDecay(.2), 0)
+        c.add(Saw(note_freq('C4')) * ExpDecay(.2) * .25, .5)
+        c.play()
 
-    def test_add_constant(self):
-        s = Saw(220)
-        e = Mul(ExpDecay(.2), .75) + .25
-        AmpMod(s, e).play()
-
-
-
+    def test_add(self):
+        f1, f2 = note_freqs('C4 E4')
+        c = Compose()
+        c.add(.25 * (Saw(f1, .2) + Saw(f2, .2)), 0)
+        c.add(1 + .25 * (Saw(f1, .2) + Saw(f2, .2)), .5)
+        c.add(.25 * (Saw(f1, .2) + Saw(f2, .2)) + 1, 1)
+        c.play()
 
 
 if __name__ == '__main__':

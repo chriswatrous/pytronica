@@ -5,7 +5,7 @@ from subprocess import call, Popen
 from random import randrange
 
 from c_util cimport dmax
-from combiners import Layer
+from combiners import Layer, Multiply
 
 include "constants.pxi"
 
@@ -35,6 +35,12 @@ cdef class Signal:
     def __radd__(self, other):
         return Layer([self, other])
 
+    def __mul__(self, other):
+        return Multiply(self, other)
+
+    def __rmul__(self, other):
+        return Multiply(self, other)
+
     def play(self):
         cdef int i, length, r1, r2
         cdef double sample
@@ -54,7 +60,7 @@ cdef class Signal:
             channels = '2' if stereo else '1'
             cmd = ['aplay', '-f', 'S16_LE', '-c', channels, '-r', str(int(_sample_rate)), fifo_name]
             player_proc = Popen(cmd)
-    
+
             # The FIFO must be opened after aplay is started.
             fifo = fopen(fifo_name, 'w')
 
