@@ -86,7 +86,7 @@ class AudioTests(unittest.TestCase):
         m.play()
 
         # Users would expect the Mul to be stereo even if the compose becomes stereo after
-         #it is hooked up to the Mul
+        #it is hooked up to the Mul
         #c = Compose()
         #m = Mul(c, 0.25)
         #c.add(Pan(Saw(220, .2), -.5), 0)
@@ -99,7 +99,6 @@ class AudioTests(unittest.TestCase):
         o.add(Saw(220.5, phase=.25))
         o.add(Pan(Saw(221), 1))
         AmpMod(Mul(o, 0.5), ExpDecay(1)).play()
-
 
     #def test_operator_overloading(self):
         #o = Pan(Saw(220), -.5) + Saw(220.5, phase=.25) + Pan(Saw(221), .5)
