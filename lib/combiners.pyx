@@ -7,17 +7,24 @@ include "constants.pxi"
 cdef class Layer(BufferSignal):
     cdef object inputs
 
-    def __init__(self, inputs):
+    def __init__(self, inputs=None):
         cdef Signal sig
 
-        self.inputs = list(inputs)
+        if inputs:
+            self.inputs = list(inputs)
 
-        # Make this object stereo if any of the inputs are stereo.
-        for sig in self.inputs:
-            if sig.is_stereo():
-                self.make_stereo()
-                break
-
+            # Make this object stereo if any of the inputs are stereo.
+            for sig in self.inputs:
+                if sig.is_stereo():
+                    self.make_stereo()
+                    break
+        else:
+            self.inputs = []
+    
+    def add(self, Signal sig):
+        self.inputs.append(sig)
+        if not self.is_stereo() and sig.is_stereo():
+            self.make_stereo()
 
     cdef int generate(self) except -1:
         cdef Signal inp
@@ -62,6 +69,8 @@ cdef class AmpMod(BufferSignal):
     def __init__(self, inp1, inp2):
         self.inp1 = inp1
         self.inp2 = inp2
+        if self.inp1.is_stereo() or self.inp2.is_stereo():
+            self.make_stereo()
 
     cdef int generate(self) except -1:
         cdef int length1, length2, length, i
@@ -74,7 +83,12 @@ cdef class AmpMod(BufferSignal):
 
         length = length1 if length1 > length2 else length2
 
-        for i in range(length):
-            self.left[i] = self.inp1.left[i] * self.inp2.left[i]
+        if self.is_stereo():
+            for i in range(length):
+                self.left[i] = self.inp1.left[i] * self.inp2.left[i]
+                self.right[i] = self.inp1.right[i] * self.inp2.right[i]
+        else:
+            for i in range(length):
+                self.left[i] = self.inp1.left[i] * self.inp2.left[i]
 
         return length

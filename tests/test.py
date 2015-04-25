@@ -93,6 +93,17 @@ class AudioTests(unittest.TestCase):
         #c.add(Pan(Saw(440, .2), .5), .5)
         #m.play()
 
+    def test_stereo_ampmod(self):
+        o = Layer()
+        o.add(Pan(Saw(220), -1))
+        o.add(Saw(220.5, phase=.25))
+        o.add(Pan(Saw(221), 1))
+        AmpMod(Mul(o, 0.5), ExpDecay(1)).play()
+
+
+    #def test_operator_overloading(self):
+        #o = Pan(Saw(220), -.5) + Saw(220.5, phase=.25) + Pan(Saw(221), .5)
+        #a = 0.5 + 0.1*Saw
 
 
 if __name__ == '__main__':
