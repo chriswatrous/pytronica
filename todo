@@ -62,6 +62,8 @@ To Do:
     Signal method to write file (raw or wav)
     rename Layer -> Add
     get rid of Mul and AmpMod, replace with operator *
+    add helper methods to Signal that would allow code like this: Saw(220).pan(-.5) + Saw(221).pan(.5)
+    FadeOut
 
 Doing:
 

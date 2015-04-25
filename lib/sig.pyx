@@ -30,10 +30,10 @@ cdef class Signal:
         return self.left != self.right
 
     def __add__(self, other):
-        return Layer([self, other])
+        return Layer(self, other)
 
     def __radd__(self, other):
-        return Layer([self, other])
+        return Layer(self, other)
 
     def __mul__(self, other):
         return Multiply(self, other)
@@ -47,8 +47,8 @@ cdef class Signal:
         cdef short output_sample
         cdef FILE *fifo
         cdef bint stereo
-        cdef double clip_max = 0
 
+        self.clip_max = 0
         stereo = self.is_stereo()
 
         try:
@@ -71,11 +71,11 @@ cdef class Signal:
                     break
                 if stereo:
                     for i in range(length):
-                        put_sample(self.left[i], fifo, &clip_max)
-                        put_sample(self.right[i], fifo, &clip_max)
+                        self.put_sample(self.left[i], fifo)
+                        self.put_sample(self.right[i], fifo)
                 else:
                     for i in range(length):
-                        put_sample(self.left[i], fifo, &clip_max)
+                        self.put_sample(self.left[i], fifo)
 
             # aplay should receive an EOF and quit when the FIFO is closed.
             fclose(fifo)
@@ -87,30 +87,36 @@ cdef class Signal:
             if player_proc.poll == None:
                 player_proc.terminate()
             call(['rm', fifo_name])
-            if clip_max > 0:
-                print 'There was clipping. ({})'.format(clip_max)
+            #if self._clip_max > 0:
+                #print 'There was clipping. ({})'.format(self.clip_max)
 
+    cdef object put_sample(self, double sample, FILE *f):
+        cdef short output_sample
+        cdef int r1, r2
 
-cdef inline object put_sample(double sample, FILE *f, double *clip_max):
-    cdef short output_sample
-    cdef int r1, r2
+        if sample > 1:
+            self.report_clipping(sample)
+            sample = 1
 
-    if sample > 1:
-        clip_max[0] = dmax(clip_max[0], sample)
-        sample = 1
+        if sample < -1:
+            self.report_clipping(sample)
+            sample = -1
 
-    if sample < -1:
-        clip_max[0] = dmax(clip_max[0], -sample)
-        sample = -1
+        output_sample = <short>(sample * 0x7FFF)
 
-    output_sample = <short>(sample * 0x7FFF)
+        r1 = putc(output_sample & 0xFF, f)
+        r2 = putc((output_sample >> 8) & 0xFF, f)
 
-    r1 = putc(output_sample & 0xFF, f)
-    r2 = putc((output_sample >> 8) & 0xFF, f)
+        # putc may return EOF if the user kills aplay before the sound is done playing.
+        if r1 == EOF or r2 == EOF:
+            raise EOFError
 
-    # putc may return EOF if the user kills aplay before the sound is done playing.
-    if r1 == EOF or r2 == EOF:
-        raise EOFError
+    cdef void report_clipping(self, double s):
+        if s < 0:
+            s *= -1
+        if s > self.clip_max:
+            self.clip_max = s
+            print 'Clipping! ({})'.format(self.clip_max)
 
 
 cdef class BufferSignal(Signal):
