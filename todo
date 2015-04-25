@@ -52,14 +52,17 @@ To Do:
     in general all parameters should be able to take signals or constants as inputs
     add comments / documentation
     delay allocation of bufferes until needed, free when done
-    overload arithmetic operators for signals
     better note mini-language: '3 C D F A Ab C Eb -G' instead of 'C3 D3 F3 A3 Ab3 C4 Eb4 G3'
     measure running time of all Signal classes and report as % of real time
     "add" method for Layer
     play_synth function that would take a synth, notes, rhythms, durations, other params, and return a Compose
+    bug: finally clause in Signal.play() doesn't execute properly on KeyboardInterrupt
+    rename Layer to Add
+    make Layer like class called Mul to replace existing Mul and AmpMod
+    Signal method to write file (raw or wav)
 
 Doing:
-    change design to allow for stereo
+    overload arithmetic operators for signals
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -71,4 +74,4 @@ Done:
     make "unit tests" that would play short sounds to test functionality
     make aplay exit properly
     report clipping
-
+    change design to allow for stereo

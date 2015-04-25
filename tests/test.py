@@ -100,9 +100,25 @@ class AudioTests(unittest.TestCase):
         o.add(Pan(Saw(221), 1))
         AmpMod(Mul(o, 0.5), ExpDecay(1)).play()
 
-    #def test_operator_overloading(self):
-        #o = Pan(Saw(220), -.5) + Saw(220.5, phase=.25) + Pan(Saw(221), .5)
-        #a = 0.5 + 0.1*Saw
+
+class OperatorTests(unittest.TestCase):
+    def test_add_signals(self):
+        def synth(n):
+            o = Saw(note_freq(n))
+            return AmpMod(o, ExpDecay(.2))
+        c = Compose()
+        c.add(synth('A3') + synth('C4') + synth('E4'), 0)
+        c.add((synth('A3') + synth('C4')) + synth('E4'), .5)
+        c.add(synth('A3') + (synth('C4') + synth('E4')), 1)
+        Mul(c, 0.4).play()
+
+    def test_add_constant(self):
+        s = Saw(220)
+        e = Mul(ExpDecay(.2), .75) + .25
+        AmpMod(s, e).play()
+
+
+
 
 
 if __name__ == '__main__':

@@ -6,25 +6,35 @@ include "constants.pxi"
 
 cdef class Layer(BufferSignal):
     cdef object inputs
+    cdef double offset
 
-    def __init__(self, inputs=None):
+    def __init__(self, *args):
         cdef Signal sig
 
-        if inputs:
-            self.inputs = list(inputs)
+        self.inputs = []
+        self.offset = 0
 
-            # Make this object stereo if any of the inputs are stereo.
-            for sig in self.inputs:
-                if sig.is_stereo():
-                    self.make_stereo()
-                    break
-        else:
-            self.inputs = []
+        for arg in args:
+            self.add(arg)
     
-    def add(self, Signal sig):
-        self.inputs.append(sig)
-        if not self.is_stereo() and sig.is_stereo():
-            self.make_stereo()
+    def add(self, inp):
+        cdef Signal sig
+        cdef Layer layer
+
+        if hasattr(inp, '__iter__'):
+            for x in inp:
+                self.add(x)
+        elif issubclass(type(inp), Layer):
+            layer = inp
+            self.add(layer.inputs)
+            self.offset += layer.offset
+        elif issubclass(type(inp), Signal):
+            sig = inp
+            self.inputs.append(sig)
+            if not self.is_stereo() and sig.is_stereo():
+                self.make_stereo()
+        else:
+            self.offset += inp
 
     cdef int generate(self) except -1:
         cdef Signal inp
@@ -56,6 +66,16 @@ cdef class Layer(BufferSignal):
             else:
                 for i in range(length):
                     self.left[i] += inp.left[i]
+
+        if self.offset != 0:
+            if stereo:
+                for i in range(max_length):
+                    self.left[i] += self.offset
+                    self.right[i] += self.offset
+            else:
+                for i in range(max_length):
+                    self.left[i] += self.offset
+            
 
         for sig in done_signals:
             self.inputs.remove(sig)

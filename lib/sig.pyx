@@ -1,10 +1,11 @@
-from libc.stdio cimport putc, FILE, fopen, EOF, fclose
+from libc.stdio cimport putc, FILE, fopen, EOF, fclose, printf
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 
 from subprocess import call, Popen
 from random import randrange
 
 from c_util cimport dmax
+from combiners import Layer
 
 include "constants.pxi"
 
@@ -27,6 +28,12 @@ cdef class Signal:
 
     cdef bint is_stereo(self):
         return self.left != self.right
+
+    def __add__(self, other):
+        return Layer([self, other])
+
+    def __radd__(self, other):
+        return Layer([self, other])
 
     def play(self):
         cdef int i, length, r1, r2
@@ -70,6 +77,7 @@ cdef class Signal:
 
         finally:
             # Run even if the user kills with ^C.
+            # FIXME This part is not working now for some reason. It was working earlier.
             if player_proc.poll == None:
                 player_proc.terminate()
             call(['rm', fifo_name])
