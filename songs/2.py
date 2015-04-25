@@ -9,14 +9,9 @@ from audio import *
     #os = [osc1(p+x) for x in [0, 12.03, 7-.03]]
     #return Layer(os)
 
-def saw(p):
-    return Saw(p2f(p))
-
 a = .5
-
-def osc(p):
-    return Pan(saw(p), -a) + Pan(saw(p+.1), a)
-
+saw = lambda p: Saw(p2f(p))
+osc = lambda p: Pan(saw(p), -a) + Pan(saw(p+.1), a)
 def synth(p):
     return osc(p) * ExpDecay(1)
 

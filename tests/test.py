@@ -7,7 +7,7 @@ from audio import *
 class AudioTests(unittest.TestCase):
     def test_sample_rate_changes(self):
         def play_sound():
-            Mul(Saw(p2f(60), 0.5), 0.25).play()
+            (.25 * Saw(p2f(60), 0.5)).play()
 
         try:
             s = get_sample_rate()
@@ -26,11 +26,10 @@ class AudioTests(unittest.TestCase):
     def test_audio_stuff(self):
         adj = 0.03
         def osc():
-            ss = [Saw(p2f(p+a)) for p in notes('F3 A3 C4 D4') for a in [0, adj, -adj]]
-            return Layer(ss)
+            return sum(Saw(p2f(p+a)) for p in notes('F3 A3 C4 D4') for a in [0, adj, -adj])
 
         def synth():
-            return Mul(AmpMod(osc(), ExpDecay(0.2)), 0.09)
+            return .09 * osc() * ExpDecay(0.2)
 
         c = Compose()
         c.add(synth(), 0)
@@ -40,24 +39,13 @@ class AudioTests(unittest.TestCase):
         c.play()
 
 
-    def test_pan(self):
-        def play(pan):
-            s = Mul(Saw(note_freq('C4'), .2), 0.25)
-            p = Pan(s, pan)
-            p.play()
-        for x in span(-1, 1, 9):
-            play(x)
-
-
     def test_stereo_layer(self):
         def synth(p, pan):
-            s = Mul(Saw(p2f(p)), 0.20)
-            a = AmpMod(s, ExpDecay(2))
-            return Pan(a, pan)
+            s = .2 * Saw(p2f(p)) * LinearDecay(5)
+            return Pan(s, pan)
         ns = notes('F3 Ab3 Db4 Eb4 G4 Bb4')
         pans = list(span(-1, 1, len(ns)))
-        ss = [synth(ns[x], pans[x]) for x in range(len(ns))]
-        Layer(ss).play()
+        sum(synth(ns[x], pans[x]) for x in range(len(ns))).play()
 
 
     def test_stereo_compose(self):
@@ -82,26 +70,17 @@ class AudioTests(unittest.TestCase):
         c = Compose()
         c.add(Pan(Saw(220, .2), -.5), 0)
         c.add(Pan(Saw(440, .2), .5), .5)
-        m = Mul(c, 0.25)
+        m = .25 * c
         m.play()
 
         # Users would expect the Mul to be stereo even if the compose becomes stereo after
         #it is hooked up to the Mul
         #c = Compose()
-        #m = Mul(c, 0.25)
+        #m = .25 * c
         #c.add(Pan(Saw(220, .2), -.5), 0)
         #c.add(Pan(Saw(440, .2), .5), .5)
         #m.play()
 
-    def test_stereo_ampmod(self):
-        o = Layer()
-        o.add(Pan(Saw(220), -1))
-        o.add(Saw(220.5, phase=.25))
-        o.add(Pan(Saw(221), 1))
-        AmpMod(Mul(o, 0.5), ExpDecay(1)).play()
-
-
-class OperatorTests(unittest.TestCase):
     def test_multiply(self):
         c = Compose()
         c.add(.25 * Saw(note_freq('A3')) * ExpDecay(.2), 0)
@@ -115,6 +94,9 @@ class OperatorTests(unittest.TestCase):
         c.add(1 + .25 * (Saw(f1, .2) + Saw(f2, .2)), .5)
         c.add(.25 * (Saw(f1, .2) + Saw(f2, .2)) + 1, 1)
         c.play()
+
+    def test_linear_decay(self):
+        (Saw(220) * LinearDecay(.3)).play()
 
 
 if __name__ == '__main__':

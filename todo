@@ -60,10 +60,12 @@ To Do:
     rename Layer to Add
     make Layer like class called Mul to replace existing Mul and AmpMod
     Signal method to write file (raw or wav)
+    rename Layer -> Add
+    get rid of Mul and AmpMod, replace with operator *
     clean up unit tests
 
 Doing:
-    overload arithmetic operators for signals
+    LinearDecay
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -76,3 +78,4 @@ Done:
     make aplay exit properly
     report clipping
     change design to allow for stereo
+    overload arithmetic operators for signals
