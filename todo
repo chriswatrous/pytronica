@@ -57,7 +57,6 @@ To Do:
     "add" method for Layer
     play_synth function that would take a synth, notes, rhythms, durations, other params, and return a Compose
     bug: finally clause in Signal.play() doesn't execute properly on KeyboardInterrupt
-    rename Layer to Add
     make Layer like class called Mul to replace existing Mul and AmpMod
     Signal method to write file (raw or wav)
     rename Layer -> Add

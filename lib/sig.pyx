@@ -6,6 +6,7 @@ from random import randrange
 
 from c_util cimport dmax
 from combiners import Layer, Multiply
+from modifiers import Pan
 
 include "constants.pxi"
 
@@ -19,7 +20,7 @@ def get_sample_rate():
     return _sample_rate
 
 
-cdef class Signal:
+cdef class Signal(object):
     def __cinit__(self):
         self.sample_rate = _sample_rate
 
@@ -43,6 +44,9 @@ cdef class Signal:
 
     #def __sub__(self, other):
         #return
+
+    def Pan(self, p):
+        return Pan(self, p)
 
     def play(self):
         cdef int i, length, r1, r2

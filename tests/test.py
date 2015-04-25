@@ -20,15 +20,15 @@ class AudioTests(unittest.TestCase):
 
     def test_stereo_layer(self):
         f1, f2 = note_freqs('C4 E4')
-        a = Pan(Saw(f1, .5), -.5) + Pan(Saw(f2, .5), .5)
+        a = Saw(f1, .5).Pan(-.5) + Saw(f2, .5).Pan(.5)
         a *= .25
         a.play()
 
     def test_stereo_compose(self):
         f1, f2 = note_freqs('C4 E4')
         c = Compose()
-        c.add(Pan(Saw(f1, .5), -.5), 0)
-        c.add(Pan(Saw(f2, .5), .5), .5)
+        c.add(Saw(f1, .5).Pan(-.5), 0)
+        c.add(Saw(f2, .5).Pan(.5), .5)
         (.25 * c).play()
 
     # Users might expect the Mul to be stereo even if the compose becomes stereo after
@@ -36,8 +36,8 @@ class AudioTests(unittest.TestCase):
     #def test_stereo_mul(self):
         #c = Compose()
         #m = .25 * c
-        #c.add(Pan(Saw(220, .2), -.5), 0)
-        #c.add(Pan(Saw(440, .2), .5), .5)
+        #c.add(Saw(220, .2).Pan(-.5), 0)
+        #c.add(Saw(440, .2).Pan(.5), .5)
         #m.play()
 
     def test_operator_multiply(self):
