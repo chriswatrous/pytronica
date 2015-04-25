@@ -65,7 +65,6 @@ class AudioTests(unittest.TestCase):
             ss = [Saw(p2f(x)) for x in ps]
             a = AmpMod(Layer(ss), ExpDecay(0.3))
             a = Mul(a, 0.3)
-            #return a
             return Pan(a, pan)
         
         a = lambda: synth(notes('C3 G3 Eb4'), -.5)
@@ -78,6 +77,23 @@ class AudioTests(unittest.TestCase):
         c.add(b(), 10*step)
         c.play()
 
-    
 
-unittest.main()
+    def test_stereo_mul(self):
+        c = Compose()
+        c.add(Pan(Saw(220, .2), -.5), 0)
+        c.add(Pan(Saw(440, .2), .5), .5)
+        m = Mul(c, 0.25)
+        m.play()
+
+        # Users would expect the Mul to be stereo even if the compose becomes stereo after
+         #it is hooked up to the Mul
+        #c = Compose()
+        #m = Mul(c, 0.25)
+        #c.add(Pan(Saw(220, .2), -.5), 0)
+        #c.add(Pan(Saw(440, .2), .5), .5)
+        #m.play()
+
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -31,7 +31,6 @@ To Do:
         Interpolating Delay
         Chorus
         Phlanger
-        change name of MulConst to just Mul
         delay with feedback
     Filters:
         1 pole low pass
@@ -56,6 +55,8 @@ To Do:
     overload arithmetic operators for signals
     better note mini-language: '3 C D F A Ab C Eb -G' instead of 'C3 D3 F3 A3 Ab3 C4 Eb4 G3'
     measure running time of all Signal classes and report as % of real time
+    "add" method for Layer
+    play_synth function that would take a synth, notes, rhythms, durations, other params, and return a Compose
 
 Doing:
     change design to allow for stereo

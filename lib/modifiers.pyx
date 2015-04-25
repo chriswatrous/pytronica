@@ -12,14 +12,21 @@ cdef class Mul(BufferSignal):
     def __init__(self, inp, amount):
         self.inp = inp
         self.amount = amount
+        if self.inp.is_stereo():
+            self.make_stereo()
 
     cdef int generate(self) except -1:
         cdef int i, length
 
         length = self.inp.generate()
-
-        for i in range(length):
-            self.left[i] = self.inp.left[i] * self.amount
+        
+        if self.is_stereo():
+            for i in range(length):
+                self.left[i] = self.inp.left[i] * self.amount
+                self.right[i] = self.inp.right[i] * self.amount
+        else:
+            for i in range(length):
+                self.left[i] = self.inp.left[i] * self.amount
 
         return length
 
