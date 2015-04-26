@@ -32,6 +32,10 @@ To Do:
         Chorus
         Phlanger
         delay with feedback
+        waveshapers:
+            Clip
+            SinShape
+            Saturate
     Filters:
         1 pole low pass
         1 pole high pass
@@ -45,8 +49,6 @@ To Do:
         AmpMod (multiply signals, total length is length of the shortest signal)
         Repeat (repeats a sound at regular intervals)
     Stereo:
-        Pan
-        a class that takes a mono modifier and makes it stereo
         stereo reverb, chorus, phlanger, synths, etc.
     make sure all object can handle splitting and recombining of the signal paths
     in general all parameters should be able to take signals or constants as inputs
@@ -54,17 +56,16 @@ To Do:
     delay allocation of bufferes until needed, free when done
     better note mini-language: '3 C D F A Ab C Eb -G' instead of 'C3 D3 F3 A3 Ab3 C4 Eb4 G3'
     measure running time of all Signal classes and report as % of real time
-    "add" method for Layer
     play_synth function that would take a synth, notes, rhythms, durations, other params, and return a Compose
     bug: finally clause in Signal.play() doesn't execute properly on KeyboardInterrupt
     make Layer like class called Mul to replace existing Mul and AmpMod
     Signal method to write file (raw or wav)
     rename Layer -> Add
     get rid of Mul and AmpMod, replace with operator *
-    add helper methods to Signal that would allow code like this: Saw(220).pan(-.5) + Saw(221).pan(.5)
     FadeOut
-    operator subtract
     operator divide for dividing by constants
+    Take, Drop, and Slice classes, git rid of length argument in Saw
+
 
 Doing:
 
@@ -82,3 +83,7 @@ Done:
     overload arithmetic operators for signals
     LinearDecay
     clean up unit tests
+    add helper methods to Signal that would allow code like this: Saw(220).pan(-.5) + Saw(221).pan(.5)
+    "add" method for Layer
+    operator subtract
+    test error conditions

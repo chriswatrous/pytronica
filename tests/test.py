@@ -4,7 +4,7 @@ import unittest
 
 from audio import *
 
-class AudioTests(unittest.TestCase):
+class Tests(unittest.TestCase):
     def test_sample_rate_changes(self):
         def play_sound():
             (.25 * Saw(p2f(60), 0.5)).play()
@@ -40,19 +40,37 @@ class AudioTests(unittest.TestCase):
         #c.add(Saw(440, .2).Pan(.5), .5)
         #m.play()
 
-    def test_operator_multiply(self):
+    def test_mul(self):
+        f = note_freq('F#3')
         c = Compose()
-        c.add(.25 * Saw(note_freq('A3')) * ExpDecay(.2), 0)
-        c.add(Saw(note_freq('C4')) * ExpDecay(.2) * .25, .5)
+        c.add(.25 * Saw(f) * ExpDecay(.2), 0)
+        c.add(Saw(f) * ExpDecay(.2) * .25, .5)
         c.play()
 
-    def test_operator_add(self):
+    def test_add(self):
         f1, f2 = note_freqs('C4 E4')
         c = Compose()
         c.add(.25 * (Saw(f1, .2) + Saw(f2, .2)), 0)
         c.add(1 + .25 * (Saw(f1, .2) + Saw(f2, .2)), .5)
         c.add(.25 * (Saw(f1, .2) + Saw(f2, .2)) + 1, 1)
         c.play()
+
+    def test_sub(self):
+        c = Compose()
+        c.add(Saw(220, .5) - Saw(220, .5, phase=0.5), 0)
+        c.add(2 - Saw(220, .5), .5)
+        c.add(Saw(220, .5) - 2, 1)
+        (.5 * c).play()
+
+
+class ErrorTests(unittest.TestCase):
+    def test_operator_errors(self):
+        self.assertRaises(TypeError, lambda: Saw(220) + 'a')
+        self.assertRaises(TypeError, lambda: Saw(220) - 'a')
+        self.assertRaises(TypeError, lambda: Saw(220) * 'a')
+        self.assertRaises(TypeError, lambda: 'a' + Saw(220))
+        self.assertRaises(TypeError, lambda: 'a' - Saw(220))
+        self.assertRaises(TypeError, lambda: 'a' * Saw(220))
 
 
 if __name__ == '__main__':

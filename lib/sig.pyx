@@ -30,20 +30,23 @@ cdef class Signal(object):
     cdef bint is_stereo(self):
         return self.left != self.right
 
-    def __add__(self, other):
-        return Layer(self, other)
+    def __add__(a, b):
+        try:
+            return Layer(a, b)
+        except TypeError:
+            return NotImplemented
 
-    def __radd__(self, other):
-        return Layer(self, other)
+    def __mul__(a, b):
+        try:
+            return Multiply(a, b)
+        except TypeError:
+            return NotImplemented
 
-    def __mul__(self, other):
-        return Multiply(self, other)
-
-    def __rmul__(self, other):
-        return Multiply(self, other)
-
-    #def __sub__(self, other):
-        #return
+    def __sub__(a, b):
+        try:
+            return a + (-1 * b)
+        except TypeError:
+            return NotImplemented
 
     def Pan(self, p):
         return Pan(self, p)
