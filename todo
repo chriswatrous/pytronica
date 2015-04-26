@@ -17,7 +17,6 @@ To Do:
         study synths in Reaktor and in FL Studio
     Envelopes:
         AR
-        ADSR
         others
         arbitrary control signal
     Modifiers:
@@ -60,13 +59,13 @@ To Do:
     bug: finally clause in Signal.play() doesn't execute properly on KeyboardInterrupt
     make Layer like class called Mul to replace existing Mul and AmpMod
     Signal method to write file (raw or wav)
-    rename Layer -> Add
     FadeOut
     operator divide for dividing by constants
     Take, Drop, and Slice classes, git rid of length argument in Saw
 
 Doing:
-    get rid of Mul and AmpMod, replace with operator *
+    ADSREnvelope
+    Controller
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -86,3 +85,4 @@ Done:
     "add" method for Layer
     operator subtract
     test error conditions
+    get rid of Mul and AmpMod

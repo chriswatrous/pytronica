@@ -1,6 +1,6 @@
 from __future__ import division
 
-from sig cimport Signal, BufferSignal 
+from sig cimport Signal, BufferSignal
 
 include "constants.pxi"
 
@@ -27,27 +27,37 @@ cdef class ExpDecay(BufferSignal):
 
 
 cdef class LinearDecay(BufferSignal):
-    cdef double value, step
+    cdef long sample_count, total_samples,
+    cdef double m, b, end_value
+    cdef bint finite
 
-    def __init__(self, decay_time, start_value=1):
+    def __cinit__(self, double decay_time, double start_value=1, double end_value=0, bint finite=True):
         if decay_time <= 0:
             raise ValueError('decay_time must be a positive number')
-        self.value = start_value
-        self.step = start_value / decay_time / self.sample_rate
+        self.finite = finite
+        self.sample_count = 0
+        self.total_samples = <long>(decay_time * self.sample_rate)
+        self.m = (end_value - start_value) / self.sample_rate / decay_time
+        self.b = start_value
+        self.end_value = end_value
 
     cdef int generate(self) except -1:
         cdef int i, length
 
-        if self.value < 0:
-            return 0
+        if self.finite and self.sample_count >= self.total_samples:
+                return 0
 
-        length = BUFFER_SIZE
+        if self.sample_count <= self.total_samples + BUFFER_SIZE:
+            i = 0
+            while i < BUFFER_SIZE:
+                if self.sample_count < self.total_samples:
+                    self.left[i] = self.m * self.sample_count + self.b
+                else:
+                    if self.finite:
+                        return i
+                    else:
+                        self.left[i] = self.end_value
+                i += 1
+                self.sample_count += 1
 
-        for i in range(BUFFER_SIZE):
-            self.left[i] = self.value
-            self.value -= self.step
-            if self.value < 0:
-                length = i
-                break
-
-        return length
+        return BUFFER_SIZE

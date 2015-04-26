@@ -13,7 +13,7 @@ def e1():
     b = Saw(440)
     c = .5 * (a * (b)) * LinearDecay(5)
     c.play()
-e1()
+#e1()
 
 
 def square_wave():
@@ -24,14 +24,14 @@ def square_wave():
     a = synth(60, .3)
     a *= .5
     a.play()
-square_wave()
+#square_wave()
 
 
 def stereo_chord():
     def synth(ns):
         os = (saw(p) for p in notes(ns))
-        return stereo_spread(os, 1, True) * ExpDecay(1)
+        return stereo_spread(os, .75) * ExpDecay(1)
     a = synth('F3 Ab3 Db4 Eb4 G4 Bb4')
-    a *= 1 / 3.33
+    a *= .25
     a.play()
 stereo_chord()
