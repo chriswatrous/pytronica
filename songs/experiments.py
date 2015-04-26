@@ -4,6 +4,9 @@ from __future__ import division
 
 from audio import *
 
+def saw(p):
+    return Saw(p2f(p))
+
 def e1():
     a = Saw(220)
     b = Saw(440)
@@ -24,12 +27,10 @@ def square_wave():
 
 
 def stereo_chord():
-    def synth(p, pan):
-        s = Saw(p2f(p)) * ExpDecay(1)
-        return Pan(s, pan)
-    ns = notes('F3 Ab3 Db4 Eb4 G4 Bb4')
-    pans = list(span(-1, 1, len(ns)))
-    a = sum(synth(ns[x], pans[x]) for x in range(len(ns)))
+    def synth(ns):
+        os = (saw(p) for p in notes(ns))
+        return stereo_spread(os, 1, True) * ExpDecay(1)
+    a = synth('F3 Ab3 Db4 Eb4 G4 Bb4')
     a *= 1 / 3.33
     a.play()
 stereo_chord()

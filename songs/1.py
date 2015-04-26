@@ -23,7 +23,7 @@ def part1():
 
     def arp(s):
         ns = notes(s)
-        pans = list(span(-pan_spread, pan_spread, len(ns)))
+        pans = list(f_range(-pan_spread, pan_spread, len(ns)))
         c = Compose()
         delay = 0
         for x in [0,1,2,1,3,2,1]:
@@ -56,7 +56,7 @@ def part1a():
 
     def arp(s):
         ns = notes(s)
-        pans = list(span(-pan_spread, pan_spread, len(ns)))
+        pans = list(f_range(-pan_spread, pan_spread, len(ns)))
         c = Compose()
         delay = 0
         for x in [0,1,2,1,3,2,1]:
@@ -148,5 +148,8 @@ c.add(.5 * part1a(), 0)
 c.add(part2(), 0)
 c.add(1 * part3(), step*(14*4))
 
-(.25 * c).play()
-#(.25 * part1a()).play()
+a = c
+#a = part2()
+
+a *= .2
+a.play()

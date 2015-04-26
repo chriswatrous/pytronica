@@ -126,7 +126,7 @@ cdef class Signal(object):
             sample *= -1
         if sample > self.clip_max:
             self.clip_max = sample
-            print 'Clipping! ({})'.format(self.clip_max)
+            print 'Clipping! (max value = {})'.format(self.clip_max)
 
 
 cdef class BufferSignal(Signal):
