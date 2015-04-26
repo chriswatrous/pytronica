@@ -61,13 +61,12 @@ To Do:
     make Layer like class called Mul to replace existing Mul and AmpMod
     Signal method to write file (raw or wav)
     rename Layer -> Add
-    get rid of Mul and AmpMod, replace with operator *
     FadeOut
     operator divide for dividing by constants
     Take, Drop, and Slice classes, git rid of length argument in Saw
 
-
 Doing:
+    get rid of Mul and AmpMod, replace with operator *
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)

@@ -126,36 +126,3 @@ cdef class Multiply(BufferSignal):
                     self.right[i] = self.inp1.right[i] * self.constant_factor
 
         return length
-
-
-
-
-cdef class AmpMod(BufferSignal):
-    cdef Signal inp1, inp2
-
-    def __init__(self, inp1, inp2):
-        self.inp1 = inp1
-        self.inp2 = inp2
-        if self.inp1.is_stereo() or self.inp2.is_stereo():
-            self.make_stereo()
-
-    cdef int generate(self) except -1:
-        cdef int length1, length2, length, i
-
-        length1 = self.inp1.generate()
-        length2 = self.inp2.generate()
-
-        if length1 == 0 or length2 == 0:
-            return 0
-
-        length = length1 if length1 > length2 else length2
-
-        if self.is_stereo():
-            for i in range(length):
-                self.left[i] = self.inp1.left[i] * self.inp2.left[i]
-                self.right[i] = self.inp1.right[i] * self.inp2.right[i]
-        else:
-            for i in range(length):
-                self.left[i] = self.inp1.left[i] * self.inp2.left[i]
-
-        return length

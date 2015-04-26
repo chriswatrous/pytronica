@@ -7,12 +7,13 @@ from audio import *
 def saw(p):
     return Saw(p2f(p))
 
+
 def e1():
     a = Saw(220)
     b = Saw(440)
     c = .5 * (a * (b)) * LinearDecay(5)
     c.play()
-#e1()
+e1()
 
 
 def square_wave():
@@ -23,7 +24,7 @@ def square_wave():
     a = synth(60, .3)
     a *= .5
     a.play()
-#square_wave()
+square_wave()
 
 
 def stereo_chord():

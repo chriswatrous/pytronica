@@ -5,32 +5,6 @@ from libc.math cimport cos, sqrt
 
 include "constants.pxi"
 
-cdef class Mul(BufferSignal):
-    cdef Signal inp
-    cdef double amount
-
-    def __init__(self, inp, amount):
-        self.inp = inp
-        self.amount = amount
-        if self.inp.is_stereo():
-            self.make_stereo()
-
-    cdef int generate(self) except -1:
-        cdef int i, length
-
-        length = self.inp.generate()
-        
-        if self.is_stereo():
-            for i in range(length):
-                self.left[i] = self.inp.left[i] * self.amount
-                self.right[i] = self.inp.right[i] * self.amount
-        else:
-            for i in range(length):
-                self.left[i] = self.inp.left[i] * self.amount
-
-        return length
-
-
 cdef class Pan(BufferSignal):
     cdef Signal inp
     cdef double left_gain, right_gain
