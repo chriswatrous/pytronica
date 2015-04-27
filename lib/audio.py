@@ -11,4 +11,5 @@ from compose import Compose
 from envelopes import ExpDecay, LinearDecay
 from combiners import Layer
 from modifiers import Pan
+from controller import Controller
 import sig

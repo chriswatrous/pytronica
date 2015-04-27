@@ -52,7 +52,6 @@ cdef class Signal(object):
         return Pan(self, p)
 
     def play(self):
-        cdef int i, length, r1, r2
         cdef double sample
         cdef short output_sample
         cdef FILE *fifo
@@ -73,34 +72,49 @@ cdef class Signal(object):
 
             # The FIFO must be opened after aplay is started.
             fifo = fopen(fifo_name, 'w')
-
-            # Write the samples to the FIFO.
-            while True:
-                length = self.generate()
-                if length == 0:
-                    break
-                if stereo:
-                    for i in range(length):
-                        self.put_sample(self.left[i], fifo)
-                        self.put_sample(self.right[i], fifo)
-                else:
-                    for i in range(length):
-                        self.put_sample(self.left[i], fifo)
+            self.write_output(fifo)
+            fclose(fifo)
 
             # aplay should receive an EOF and quit when the FIFO is closed.
-            fclose(fifo)
             player_proc.wait()
 
         finally:
             # Run even if the user kills with ^C.
-            # FIXME This part is not working now for some reason. It was working earlier.
+            # FIXME This part is not working now for some reason. The code never gets called. I thought
+            # it was working earlier.
             if player_proc.poll == None:
                 player_proc.terminate()
             call(['rm', fifo_name])
-            #if self._clip_max > 0:
-                #print 'There was clipping. ({})'.format(self.clip_max)
 
-    cdef object put_sample(self, double sample, FILE *f):
+
+    def rawwrite(self, filename):
+        cdef FILE *f
+
+        f = fopen(filename, 'w')
+        self.write_output(f)
+        fclose(f)
+
+
+    cdef write_output(self, FILE *f):
+        cdef int i, length
+        cdef bint stereo
+
+        stereo = self.is_stereo()
+
+        while True:
+            length = self.generate()
+            if length == 0:
+                break
+            if stereo:
+                for i in range(length):
+                    self.put_sample(self.left[i], f)
+                    self.put_sample(self.right[i], f)
+            else:
+                for i in range(length):
+                    self.put_sample(self.left[i], f)
+
+
+    cdef put_sample(self, double sample, FILE *f):
         cdef short output_sample
         cdef int r1, r2
 
@@ -121,7 +135,7 @@ cdef class Signal(object):
         if r1 == EOF or r2 == EOF:
             raise EOFError
 
-    cdef void report_clipping(self, double sample):
+    cdef report_clipping(self, double sample):
         if sample < 0:
             sample *= -1
         if sample > self.clip_max:

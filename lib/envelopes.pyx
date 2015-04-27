@@ -5,22 +5,30 @@ from sig cimport Signal, BufferSignal
 include "constants.pxi"
 
 cdef class ExpDecay(BufferSignal):
-    cdef double value, step
+    cdef double value, step, start_value, end_value
+    cdef bint finite
 
-    def __init__(self, half_life, start_value=1):
+    def __cinit__(self, double half_life, double start_value=1, double end_value=0, bint finite=True):
         if half_life <= 0:
             raise ValueError('half_life must be a positive number')
-        self.value = start_value
+        self.value = 1
         self.step = 2**(-1 / self.sample_rate / half_life)
+        self.start_value = start_value
+        self.end_value = end_value
+        self.finite = finite
 
     cdef int generate(self) except -1:
         cdef int i
+        cdef double m, b
 
-        if self.value < 0.0003:
+        if self.finite and self.value < 0.0003:
             return 0
 
+        m = self.start_value - self.end_value
+        b = self.end_value
+
         for i in range(BUFFER_SIZE):
-            self.left[i] = self.value
+            self.left[i] = m * self.value + b
             self.value *= self.step
 
         return BUFFER_SIZE

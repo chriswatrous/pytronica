@@ -58,14 +58,17 @@ To Do:
     play_synth function that would take a synth, notes, rhythms, durations, other params, and return a Compose
     bug: finally clause in Signal.play() doesn't execute properly on KeyboardInterrupt
     make Layer like class called Mul to replace existing Mul and AmpMod
-    Signal method to write file (raw or wav)
+    Signal.wavwrite()
     FadeOut
     operator divide for dividing by constants
     Take, Drop, and Slice classes, git rid of length argument in Saw
+    relative time for Compose and Controller: set_relative_time(), set_absolute_time(), set_time()
+    Signal.rawwrite() improve error handling, allow writing to stdout
+    Controller.hold(), Controller.expto(), Controller.jumpto()
+    make functions void if they will never throw exceptions
 
 Doing:
     ADSREnvelope
-    Controller
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -86,3 +89,5 @@ Done:
     operator subtract
     test error conditions
     get rid of Mul and AmpMod
+    Signal.rawwrite()
+    Controller with lineto

@@ -75,17 +75,31 @@ class Tests(unittest.TestCase):
             delay += 1
         (0.25 * c).play()
 
+    def test_exp_decay(self):
+        ss = [
+            Saw(220) * ExpDecay(.1),
+            Saw(220) * ExpDecay(.1, 0, 1) * LinearDecay(1),
+            Saw(220) * ExpDecay(.2, 0, .5, finite=False) * LinearDecay(3),
+            ]
+        c = Compose()
+        delay = 0
+        for s in ss:
+            c.add(s, delay)
+            delay += 1
+        (0.25 * c).play()
+
+    def test_controller(self):
+        co = Controller(0)
+        co.lineto(.5, 1)
+        co.lineto(1, 0)
+        co.lineto(1.5, 1)
+        co.lineto(2, 0)
+        a = .5 * Saw(220) * co
+        a.play()
+
 
     #def test_adsr(self):
         #a = Saw(220) * ADSREnvelope(2, .5, .5, .25, .05)
-        #a.play()
-
-    #def test_controller(self):
-        #co = Controller(start=0, relative_time=False)   # start at 0
-        #co.lineto(time=1, value=1)      # move linearly to 1
-        #co.expto(time=3, value=.25, half_life=.3) # exponentially decay to a value of .25 with a half life of .3
-        #co.jumpto(value)
-        #a = .5 * Saw(220) * co
         #a.play()
 
 
@@ -97,6 +111,15 @@ class ErrorTests(unittest.TestCase):
         self.assertRaises(TypeError, lambda: 'a' + Saw(220))
         self.assertRaises(TypeError, lambda: 'a' - Saw(220))
         self.assertRaises(TypeError, lambda: 'a' * Saw(220))
+
+    def test_controller_errors(self):
+        with self.assertRaises(ValueError):
+            co = Controller(0)
+            co.lineto(1, 1)
+            co.lineto(.5, 0)
+        with self.assertRaises(IndexError):
+            co = Controller(0)
+            co.play()
 
 
 if __name__ == '__main__':
