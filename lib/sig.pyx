@@ -23,6 +23,7 @@ def get_sample_rate():
 cdef class Signal(object):
     def __cinit__(self):
         self.sample_rate = _sample_rate
+        self.mlength = None
 
     cdef int generate(self) except -1:
         raise NotImplementedError

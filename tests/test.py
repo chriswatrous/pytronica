@@ -102,6 +102,16 @@ class Tests(unittest.TestCase):
         #a = Saw(220) * ADSREnvelope(2, .5, .5, .25, .05)
         #a.play()
 
+    def test_chain(self):
+        ch = Chain()
+        a = Saw(220, .5).Pan(-.5)
+        a.mlength = .5
+        ch.add(a)
+        a = Saw(440, .5).Pan(.5)
+        a.mlength = .5
+        ch.add(a)
+        (.5*ch).play()
+
 
 class ErrorTests(unittest.TestCase):
     def test_operator_errors(self):

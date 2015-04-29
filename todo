@@ -10,6 +10,7 @@ To Do:
     Synthesizers:
         basic subtractive (standard analog modeling)
         additive
+            with exp decaying sine waves, which would be easy to implement as a recurance relation
         FM
         something like Absynth
         something like Massive
@@ -19,6 +20,13 @@ To Do:
         AR
         others
         arbitrary control signal
+        ExpLinDecay:
+            x[n] = a*x[n-1] - b
+            OR
+            v[n] = v[n-1] - a
+            w[n] = b*w[n-1]
+            x[n] = w[n] + w[n]
+        explore recurance relations to see what curves I can produce
     Modifiers:
         Add
         MulAdd
@@ -66,9 +74,11 @@ To Do:
     Signal.rawwrite() improve error handling, allow writing to stdout
     Controller.hold(), Controller.expto(), Controller.jumpto()
     make functions void if they will never throw exceptions
+    ADSREnvelope
+    rename Signal.Pan() -> Signal.pan()
+    look into having Chain derive from Compose
 
 Doing:
-    ADSREnvelope
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)

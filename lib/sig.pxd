@@ -4,6 +4,7 @@ cdef class Signal:
     cdef double *left
     cdef double *right
     cdef double clip_max
+    cdef public object mlength
 
     cdef double sample_rate
     cdef bint is_stereo(self)

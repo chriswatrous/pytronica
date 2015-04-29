@@ -5,6 +5,8 @@ from c_util cimport imax, imin
 
 include "constants.pxi"
 
+from compose import Compose
+
 cdef class Layer(BufferSignal):
     cdef object inputs
     cdef double offset
@@ -126,3 +128,28 @@ cdef class Multiply(BufferSignal):
                     self.right[i] = self.inp1.right[i] * self.constant_factor
 
         return length
+
+
+cdef class Chain(Signal):
+    cdef Signal comp
+
+    def __init__(self, inputs=None):
+        self.comp = Compose()
+        self.mlength = 0
+
+        if inputs:
+            for inp in inputs:
+                self.add(inp)
+
+    def add(self, Signal inp):
+        if inp.mlength == None:
+            raise ValueError('mlength not set')
+        self.comp.add(inp, self.mlength)
+        self.mlength += inp.mlength
+
+        # The Compose might switch from mono to stereo after adding a stereo Signal.
+        self.left = self.comp.left
+        self.right = self.comp.right
+
+    cdef int generate(self) except -1:
+        return self.comp.generate()
