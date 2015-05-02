@@ -27,6 +27,12 @@ def note(s):
 def notes(s):
     return [note(x) for x in s.split()]
 
+#note_spec_re = re.compile(r'(-*|\+*)$')
+#def notes2(s):
+    #note_specs = s.split()
+    #octave = int(note_specs[0])
+
+
 def note_freq(s):
     return p2f(note(s))
 

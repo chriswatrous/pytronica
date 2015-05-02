@@ -31,10 +31,6 @@ def arp1(s, pan_spread=1):
     return c
 
 def arp1s(ss, *args, **kwargs):
-    #sigs = []
-    #for s in ss:
-        #sigs.append(arp1(s, pan_spread))
-    #return chain(sigs)
     return Chain(arp1(x, *args, **kwargs) for x in ss)
 
 if __name__ == '__main__':
