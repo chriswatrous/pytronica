@@ -112,6 +112,12 @@ class Tests(unittest.TestCase):
         ch.add(a)
         (.5*ch).play()
 
+    def test_new_arch(self):
+        s = Saw2(220, 3600)
+        #s.play()
+        s.rawwrite('out.raw')
+        mem_report()
+
 
 class ErrorTests(unittest.TestCase):
     def test_operator_errors(self):

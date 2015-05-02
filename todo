@@ -79,6 +79,8 @@ To Do:
     look into having Chain derive from Compose
 
 Doing:
+    new architecture that allows signals to be used with more than one input, even if the signals are used
+        at different times
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)

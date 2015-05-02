@@ -1,5 +1,5 @@
 from __future__ import division
-from sig cimport Signal, BufferSignal 
+from sig cimport Signal, BufferSignal
 #from math import cos, pi
 from libc.math cimport cos, sqrt
 
@@ -11,7 +11,7 @@ cdef class Pan(BufferSignal):
 
     def __cinit__(self, Signal inp, double pan):
         self.make_stereo()
-        
+
         if pan < -1 or pan > 1:
             raise ValueError('Pan must be between -1 and 1.')
 
@@ -21,7 +21,7 @@ cdef class Pan(BufferSignal):
         # This one sounds better than triangle.
         self.left_gain = cos((1 + pan)*PI/4) * sqrt(2)
         self.right_gain = cos((1 - pan)*PI/4) * sqrt(2)
-        
+
         # "Triangle" panning law. -6dB in the middle
         #self.left_gain = 1 - pan
         #self.right_gain = 1 + pan

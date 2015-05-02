@@ -13,3 +13,6 @@ from combiners import Layer, Chain
 from modifiers import Pan
 from controller import Controller
 import sig
+
+# new architecture
+from generator import mem_report, Saw2
