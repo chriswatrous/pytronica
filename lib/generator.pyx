@@ -1,6 +1,6 @@
 from libc.stdio cimport putc, FILE, fopen, EOF, fclose, printf
-from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.math cimport cos, sqrt
+from cpython.mem cimport PyMem_Malloc, PyMem_Free
 
 from subprocess import call, Popen
 from random import randrange
@@ -9,6 +9,7 @@ from c_util cimport dmax, imax
 
 include "constants.pxi"
 
+# Sample rate stuff:
 cdef double _sample_rate = 48000
 
 def set_sample_rate(r):
@@ -18,6 +19,8 @@ def set_sample_rate(r):
 def get_sample_rate():
     return _sample_rate
 
+
+# Memory tracking stuff:
 cdef int _num_buffers
 cdef int _max_buffers
 cdef int _allocated_buffers
@@ -35,91 +38,96 @@ cdef buf_count_dec(channels):
     _freed_buffers += channels
 
 def mem_report():
-    print 'Current number of buffers: {}'.format(_num_buffers)
-    print 'Max buffers: {}'.format(_num_buffers)
-    print 'Allocated buffers: {}'.format(_allocated_buffers)
-    print 'Freed buffers: {}'.format(_freed_buffers)
+    n = BUFFER_SIZE * sizeof(double)
+    print 'Current:   {:,} buffers ({:,} bytes)'.format(_num_buffers, _num_buffers * n)
+    print 'Max:       {:,} buffers ({:,} bytes)'.format(_max_buffers, _max_buffers * n)
+    print 'Allocated: {:,} buffers ({:,} bytes)'.format(_allocated_buffers, _allocated_buffers * n)
+    print 'Freed:     {:,} buffers ({:,} bytes)'.format(_freed_buffers, _freed_buffers * n)
 
-cdef class SampleBuffer(object):
+
+cdef class SamplesNode(object):
+    cdef double *_left
+    cdef double *_right
     cdef int length
-    cdef SampleBuffer next
+    cdef SamplesNode next
     cdef Generator generator
-    cdef bint stereo
     cdef bint has_more
+    cdef int _channels
+    cdef int _refcount
 
-    def __cinit__(self, generator):
+    def __cinit__(self, Generator generator, int channels):
         self.generator = generator
         self.next = None
+        self.has_more = True
+        self.length = 0
+        self._refcount = 0
+        self._channels = channels
 
-    cdef double *get_left(self):
-        raise NotImplementedError
+        if channels == 0:
+            self._left = NULL
+            self._right = NULL
+        elif channels == 1:
+            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
+            self._right = self._left
+        elif channels == 2:
+            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
+            self._right = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
+        else:
+            raise ValueError('channels must be 0, 1, or 2 (got {})'.format(channels))
 
-    cdef double *get_right(self):
-        raise NotImplementedError
+        buf_count_inc(self._channels)
 
-    cdef SampleBuffer get_next(self):
+    def __dealloc__(self):
+        if self._left != NULL:
+            PyMem_Free(self._left)
+        if self._right != NULL and self._right != self._left:
+            PyMem_Free(self._right)
+        buf_count_dec(self._channels)
+
+    cdef double *get_left(self) except NULL:
+        if self._left == NULL:
+            raise IndexError('This SamplesNode was created with 0 channels.')
+        return self._left
+
+    cdef double *get_right(self) except NULL:
+        if self._right == NULL:
+            raise IndexError('This SamplesNode was created with 0 channels.')
+        return self._right
+
+    cdef SamplesNode get_next(self):
         if self.next == None:
-            buf_type = StereoBuffer if self.stereo else MonoBuffer
-            self.next = buf_type(self.generator)
+            channels = self._channels
+            if channels == 0:
+                channels = 2 if self.generator.is_stereo() else 1
+            self.next = SamplesNode(self.generator, channels)
             self.generator.generate(self.next)
         return self.next
-
-
-cdef class MonoBuffer(SampleBuffer):
-    cdef double buf[BUFFER_SIZE]
-
-    def __cinit__(self):
-        self.stereo = False
-        buf_count_inc(1)
-
-    def __dealloc__(self):
-        buf_count_dec(1)
-
-    cdef double *get_left(self):
-        return self.buf
-
-    cdef double *get_right(self):
-        return self.buf
-
-
-cdef class StereoBuffer(SampleBuffer):
-    cdef double lbuf[BUFFER_SIZE]
-    cdef double rbuf[BUFFER_SIZE]
-
-    def __cinit__(self):
-        self.stereo = True
-        buf_count_inc(2)
-
-    def __dealloc__(self):
-        buf_count_dec(2)
-
-    cdef double *get_left(self):
-        return self.lbuf
-
-    cdef double *get_right(self):
-        return self.rbuf
 
 
 cdef class Generator(object):
     cdef double sample_rate
     cdef double clip_max
-    cdef SampleBuffer first_buf
+    cdef SamplesNode head
+    cdef SamplesNode spare
+    cdef bint started
 
     def __cinit__(self):
         self.sample_rate = _sample_rate
-        self.first_buf = None
+        self.head = None
+        self.spare = None
 
     cdef bint is_stereo(self) except -1:
         raise NotImplementedError
 
-    cdef generate(self, SampleBuffer buf):
+    cdef generate(self, SamplesNode buf):
         raise NotImplementedError
 
     cdef get_starter(self):
-        if self.first_buf == None:
-            self.first_buf = SampleBuffer(self)
-            self.first_buf.stereo = self.is_stereo()
-        return self.first_buf
+        if self.started:
+            raise IndexError('Cannot get starter after the first real buffer has been generated.')
+        if self.head == None:
+            self.head = SamplesNode(self, 0)
+        return self.head
 
     def play(self):
         cdef double sample
@@ -168,7 +176,7 @@ cdef class Generator(object):
         cdef double *left
         cdef double *right
         cdef bint stereo
-        cdef SampleBuffer buf
+        cdef SamplesNode buf
 
         stereo = self.is_stereo()
 
@@ -243,7 +251,7 @@ cdef class Saw2(Generator):
     cdef bint is_stereo(self) except -1:
         return False
 
-    cdef generate(self, SampleBuffer buf):
+    cdef generate(self, SamplesNode buf):
         cdef int i, length
         cdef double *left
 
@@ -269,13 +277,11 @@ cdef class Saw2(Generator):
         buf.has_more = not self.finite or self.remaining_samples > 0
 
 
-cdef class Pan(Generator):
-    cdef SampleBuffer inp_buf
+cdef class Pan2(Generator):
+    cdef SamplesNode inp_buf
     cdef double left_gain, right_gain
 
     def __cinit__(self, Generator inp, double pan):
-        self.make_stereo()
-
         if pan < -1 or pan > 1:
             raise ValueError('Pan must be between -1 and 1.')
 
@@ -303,11 +309,11 @@ cdef class Pan(Generator):
     cdef bint is_stereo(self) except -1:
         return True
 
-    cdef generate(self, SampleBuffer buf):
+    cdef generate(self, SamplesNode buf):
         cdef int i
         cdef double *left
         cdef double *right
-        cdef SampleBuffer inp_buf
+        cdef SamplesNode inp_buf
 
         self.inp_buf = self.inp_buf.get_next()
 
@@ -320,4 +326,5 @@ cdef class Pan(Generator):
             left[i] = inp_left[i] * self.left_gain
             right[i] = inp_right[i] * self.right_gain
 
+        buf.length = self.inp_buf.length
         buf.has_more = self.inp_buf.has_more

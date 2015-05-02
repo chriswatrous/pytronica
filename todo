@@ -77,10 +77,15 @@ To Do:
     ADSREnvelope
     rename Signal.Pan() -> Signal.pan()
     look into having Chain derive from Compose
+    new architecture:
+        recycle linked list nodes
+        Generator.set_no_recycle() method
+        check that no new starters are given out after evaluation has started
+        test error conditions
 
 Doing:
-    new architecture that allows signals to be used with more than one input, even if the signals are used
-        at different times
+    new architecture:
+        recycle linked list nodes
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -103,3 +108,4 @@ Done:
     get rid of Mul and AmpMod
     Signal.rawwrite()
     Controller with lineto
+    new architecture: linked lists of sample buffers

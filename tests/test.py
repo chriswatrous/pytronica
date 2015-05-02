@@ -1,6 +1,7 @@
 #! /usr/bin/python
 from __future__ import division
 import unittest
+import gc
 
 from audio import *
 
@@ -113,9 +114,9 @@ class Tests(unittest.TestCase):
         (.5*ch).play()
 
     def test_new_arch(self):
-        s = Saw2(220, 3600)
-        #s.play()
-        s.rawwrite('out.raw')
+        s = Pan2(Saw2(220, .2), .5)
+        s.play()
+        #s.rawwrite('out.raw')
         mem_report()
 
 
