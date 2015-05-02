@@ -15,4 +15,5 @@ from controller import Controller
 import sig
 
 # new architecture
-from generator import mem_report, mem_report_clear, Saw2, Pan2, Silence, NoOp
+from generator import Saw2, Pan2, Silence, NoOp
+from buffernode import mem_report, mem_report_clear

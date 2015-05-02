@@ -40,7 +40,7 @@ def test2():
     r1 = TimeReporter()
     r2 = TimeReporter()
     for _ in range(5):
-        mem_report_clear()
+        #mem_report_clear()
         s = Saw2(220, 3600)
         p1 = Pan2(s, -.5)
         p2 = Pan2(s, .5)

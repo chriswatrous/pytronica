@@ -77,6 +77,7 @@ To Do:
     ADSREnvelope
     rename Signal.Pan() -> Signal.pan()
     look into having Chain derive from Compose
+    rename internal/private methods and fields to start with underscore
     new architecture:
         recycle linked list nodes
         Generator.set_no_recycle() method
@@ -85,7 +86,7 @@ To Do:
 
 Doing:
     new architecture:
-        recycle linked list nodes
+        move BufferNode to separate file
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -108,4 +109,6 @@ Done:
     get rid of Mul and AmpMod
     Signal.rawwrite()
     Controller with lineto
-    new architecture: linked lists of sample buffers
+    new architecture:
+        linked lists of sample buffers
+        recycle linked list nodes

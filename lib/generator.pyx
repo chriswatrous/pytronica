@@ -8,164 +8,28 @@ from random import randrange
 from time import time
 
 from c_util cimport dmax, imax
+from buffernode cimport BufferNode
+from buffernode import BufferNode
 
 include "constants.pxi"
+
 
 # Sample rate stuff:
 cdef double _sample_rate = 48000
 
 def set_sample_rate(r):
+    """Set the global sample rate for all new objects.
+    Already existing object will still use the old sample rate."""
     global _sample_rate
     _sample_rate = r
 
 def get_sample_rate():
+    """Get the global sample rate."""
     return _sample_rate
 
 
-# Memory tracking stuff:
-cdef int _num_buffers
-cdef int _max_buffers
-cdef int _allocated_buffers
-cdef int _freed_buffers
-
-cdef buf_count_inc(channels):
-    global _num_buffers, _max_buffers, _allocated_buffers
-    _num_buffers += channels
-    _max_buffers = imax(_max_buffers, _num_buffers)
-    _allocated_buffers += channels
-
-cdef buf_count_dec(channels):
-    global _num_buffers, _freed_buffers
-    _num_buffers -= channels
-    _freed_buffers += channels
-
-def mem_report():
-    n = BUFFER_SIZE * sizeof(double)
-    print 'Current:   {:,} buffers ({:,} bytes)'.format(_num_buffers, _num_buffers * n)
-    print 'Max:       {:,} buffers ({:,} bytes)'.format(_max_buffers, _max_buffers * n)
-    print 'Allocated: {:,} buffers ({:,} bytes)'.format(_allocated_buffers, _allocated_buffers * n)
-    print 'Freed:     {:,} buffers ({:,} bytes)'.format(_freed_buffers, _freed_buffers * n)
-
-def mem_report_clear():
-    global _num_buffers, _max_buffers, _allocated_buffers, _freed_buffers
-    _num_buffers = 0
-    _max_buffers = 0
-    _allocated_buffers = 0
-    _freed_buffers = 0
-
-cdef class BufferNode(object):
-    cdef double *_left
-    cdef double *_right
-    cdef int channels
-
-    cdef int length
-    cdef BufferNode next
-    cdef Generator generator
-    cdef bint has_more
-    cdef int _uses
-
-    def __cinit__(self, Generator generator, int channels):
-        self.reset()
-
-        self.generator = generator
-        self.channels = channels
-
-        if channels == 0:
-            self._left = NULL
-            self._right = NULL
-        elif channels == 1:
-            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
-            self._right = self._left
-        elif channels == 2:
-            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
-            self._right = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
-        else:
-            raise ValueError('channels must be 0, 1, or 2 (got {})'.format(channels))
-
-        buf_count_inc(self.channels)
-
-    def __dealloc__(self):
-        #print 'BufferNode.__dealloc__ yay!'
-        self.dispose()
-
-    cdef reset(self):
-        self.next = None
-        self.has_more = True
-        self.length = 0
-        self._uses = 0
-
-    cdef dispose(self):
-        self.next = None
-        self.generator = None
-
-        if self._left != NULL:
-            PyMem_Free(self._left)
-        if self._right != NULL and self._right != self._left:
-            PyMem_Free(self._right)
-
-        buf_count_dec(self.channels)
-
-    cdef double *get_left(self) except NULL:
-        if self._left == NULL:
-            raise IndexError('This BufferNode was created with 0 channels.')
-        return self._left
-
-    cdef double *get_right(self) except NULL:
-        if self._right == NULL:
-            raise IndexError('This BufferNode was created with 0 channels.')
-        return self._right
-
-    cdef BufferNode get_next(self):
-        cdef int channels
-        self.generator.started = True
-
-        # Generate the next node if it doesn't already exist.
-        if not self.next:
-            channels = self.channels if self.channels != 0 else (2 if self.generator.is_stereo() else 1)
-
-            # Recycle this node now?
-            if self.generator.starters == 1 and self.channels > 0:
-                self.generator.generate(self)
-                return self
-
-            # Recycle the spare node?
-            if self.generator.spare:
-                # Recycle.
-                self.next = self.generator.spare
-                self.generator.spare = None
-            else:
-                # Create new node.
-                self.next = BufferNode(self.generator, channels)
-
-            self.generator.generate(self.next)
-
-        self._uses += 1
-
-        next = self.next
-
-        # If this node will not be used again.
-        if self._uses == self.generator.starters:
-            if self.channels == 0:
-                self.generator.starter = None
-                #self.dispose()
-            else:
-                #if self.generator.spare:
-                    #self.dispose()
-                #else:
-                if True:
-                    self.generator.spare = self
-                    self.reset()
-
-        return next
-
-
 cdef class Generator(object):
-    cdef double sample_rate
-    cdef double _clip_max
-    cdef BufferNode starter
-    cdef BufferNode spare
-    cdef int starters
-    cdef bint started
+    """Abstract base class for objects that generate (or modify) sample data."""
 
     def __cinit__(self):
         self.sample_rate = _sample_rate
@@ -228,7 +92,7 @@ cdef class Generator(object):
         fclose(f)
 
     cdef write_output(self, FILE *f):
-        cdef int i, length
+        cdef int i
         cdef double *left
         cdef double *right
         cdef bint stereo
@@ -291,7 +155,7 @@ cdef class Generator(object):
         return time() - t
 
 
-# Measured at 0.018% of real time.
+# Measured at 180us/s.
 cdef class Saw2(Generator):
     cdef double step
     cdef double value
@@ -342,7 +206,7 @@ cdef class Saw2(Generator):
         buf.has_more = not self.finite or self.remaining_samples > 0
 
 
-# Measured at 0.0091% real time with NoOp as input.
+# Measured at 91us/s with NoOp as input.
 cdef class Pan2(Generator):
     cdef BufferNode inp_buf
     cdef double left_gain, right_gain
@@ -396,7 +260,7 @@ cdef class Pan2(Generator):
         buf.has_more = self.inp_buf.has_more
 
 
-# Measured at 0.0024% real time.
+# Measured at 24us/s.
 cdef class Silence(Generator):
     cdef long samples_left
 
@@ -419,7 +283,7 @@ cdef class Silence(Generator):
         self.samples_left -= BUFFER_SIZE
 
 
-# Measured at 0.000092% real time.
+# Measured at 920ns/s real time.
 cdef class NoOp(Generator):
     cdef long samples_left
 
