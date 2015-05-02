@@ -15,4 +15,4 @@ from controller import Controller
 import sig
 
 # new architecture
-from generator import mem_report, Saw2, Pan2
+from generator import mem_report, Saw2, Pan2, Silence, NoOp
