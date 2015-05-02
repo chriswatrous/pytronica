@@ -46,6 +46,12 @@ def mem_report():
     print 'Allocated: {:,} buffers ({:,} bytes)'.format(_allocated_buffers, _allocated_buffers * n)
     print 'Freed:     {:,} buffers ({:,} bytes)'.format(_freed_buffers, _freed_buffers * n)
 
+def mem_report_clear():
+    global _num_buffers, _max_buffers, _allocated_buffers, _freed_buffers
+    _num_buffers = 0
+    _max_buffers = 0
+    _allocated_buffers = 0
+    _freed_buffers = 0
 
 cdef class BufferNode(object):
     cdef double *_left
@@ -79,6 +85,7 @@ cdef class BufferNode(object):
         buf_count_inc(self.channels)
 
     def __dealloc__(self):
+        #print 'BufferNode.__dealloc__ yay!'
         self.dispose()
 
     cdef reset(self):
@@ -140,11 +147,12 @@ cdef class BufferNode(object):
         if self._uses == self.generator.starters:
             if self.channels == 0:
                 self.generator.starter = None
-                self.dispose()
+                #self.dispose()
             else:
-                if self.generator.spare:
-                    self.dispose()
-                else:
+                #if self.generator.spare:
+                    #self.dispose()
+                #else:
+                if True:
                     self.generator.spare = self
                     self.reset()
 
