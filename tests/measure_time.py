@@ -25,8 +25,8 @@ def test1():
     r = TimeReporter()
     for _ in range(5):
         #s = Saw(220, 3600) # .735
-        s = Pan2(NoOp(3600), -.5) # 0.38
-        #s = Pan2(Saw(220, 3600), -.5) # 1.05
+        s = Pan(NoOp(3600), -.5) # 0.38
+        #s = Pan(Saw(220, 3600), -.5) # 1.05
         #s = NoOp(3600) # .00236
         #s = Silence(3600) # .0803
 
@@ -42,8 +42,8 @@ def test2():
     for _ in range(5):
         #mem_report_clear()
         s = Saw(220, 3600)
-        p1 = Pan2(s, -.5)
-        p2 = Pan2(s, .5)
+        p1 = Pan(s, -.5)
+        p2 = Pan(s, .5)
         r1.report(p1.measure_time())
         mem_report()
         r2.report(p2.measure_time())

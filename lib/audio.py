@@ -9,11 +9,11 @@ from synth import stereo_spread, pSaw
 from compose import Compose
 from envelopes import ExpDecay, LinearDecay
 from combiners import Layer, Chain
-from modifiers import Pan
 from controller import Controller
 import sig
 
 # new architecture
-from generator import Pan2, Silence, NoOp
+from generator import Silence, NoOp
 from buffernode import mem_report, mem_report_clear
 from osc import Saw
+from modifiers import Pan
