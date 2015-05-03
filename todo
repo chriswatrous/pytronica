@@ -78,6 +78,7 @@ To Do:
     rename Signal.Pan() -> Signal.pan()
     look into having Chain derive from Compose
     rename internal/private methods and fields to start with underscore
+    make sure all files import future division
     new architecture:
         recycle linked list nodes
         Generator.set_no_recycle() method

@@ -115,8 +115,8 @@ class Tests(unittest.TestCase):
 
     def test_new_arch(self):
         s = Saw(220, .2)
-        p1 = Pan2(s, .5)
-        p2 = Pan2(s, -.5)
+        p1 = Pan(s, .5)
+        p2 = Pan(s, -.5)
         p1.play()
         #mem_report()
         p2.play()

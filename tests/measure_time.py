@@ -10,29 +10,30 @@ times = []
 def average(lst):
     return sum(lst) / len(lst)
 
+
 class TimeReporter(object):
-    def __init__(self):
+    def __init__(self, indent=0):
         self.time_list = []
+        self.indent = indent
 
     def report(self, t):
         self.time_list.append(t)
-        print 'time: {}  average: {}'.format(t, sum(self.time_list) / len(self.time_list))
+        print ' ' * self.indent + 'time: {}  average: {}'.format(t, sum(self.time_list) / len(self.time_list))
 
 
-
-def test1():
-    print 'test1'
-    r = TimeReporter()
+def measure(s):
+    print s
+    r = TimeReporter(indent=2)
     for _ in range(5):
-        #s = Saw(220, 3600) # .735
-        s = Pan(NoOp(3600), -.5) # 0.38
-        #s = Pan(Saw(220, 3600), -.5) # 1.05
-        #s = NoOp(3600) # .00236
-        #s = Silence(3600) # .0803
-
-        r.report(s.measure_time())
+        a = eval(s)
+        r.report(a.measure_time())
     print
-#test1()
+
+measure('NoOp(3600)')
+measure('Silence(3600)')
+measure('Saw(220, 3600)')
+measure('Pan(NoOp(3600), -.5)')
+measure('Pan(Saw(220, 3600), -.5)')
 
 
 def test2():
@@ -50,4 +51,4 @@ def test2():
         mem_report()
         print
     print
-test2()
+#test2()

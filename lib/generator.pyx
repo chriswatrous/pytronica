@@ -1,5 +1,4 @@
 from libc.stdio cimport putc, FILE, fopen, EOF, fclose, printf
-from libc.string cimport memset
 from libc.math cimport cos, sqrt
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 
@@ -43,7 +42,7 @@ cdef class Generator(object):
 
     def get_starter(self):
         if self.started:
-            raise IndexError('Cannot get starter after the first real buffer has been generated.')
+            raise IndexError('Cannot use a Generator as an input after it has already been generated.')
         self.starters += 1
         if self.starter == None:
             self.starter = BufferNode(self, channels=0)
@@ -153,47 +152,3 @@ cdef class Generator(object):
             buf = buf.get_next()
 
         return time() - t
-
-
-# Measured at 24us/s.
-cdef class Silence(Generator):
-    cdef long samples_left
-
-    def __cinit__(self, length):
-        self.samples_left = <long>(length * self.sample_rate)
-
-    cdef bint is_stereo(self) except -1:
-        return False
-
-    cdef generate(self, BufferNode buf):
-        memset(buf.get_left(), 0, BUFFER_SIZE * sizeof(double))
-
-        if self.samples_left <= BUFFER_SIZE:
-            buf.has_more = False
-            buf.length = self.samples_left
-        else:
-            buf.has_more = True
-            buf.length = BUFFER_SIZE
-
-        self.samples_left -= BUFFER_SIZE
-
-
-# Measured at 920ns/s real time.
-cdef class NoOp(Generator):
-    cdef long samples_left
-
-    def __cinit__(self, length):
-        self.samples_left = <long>(length * self.sample_rate)
-
-    cdef bint is_stereo(self) except -1:
-        return False
-
-    cdef generate(self, BufferNode buf):
-        if self.samples_left <= BUFFER_SIZE:
-            buf.has_more = False
-            buf.length = self.samples_left
-        else:
-            buf.has_more = True
-            buf.length = BUFFER_SIZE
-
-        self.samples_left -= BUFFER_SIZE

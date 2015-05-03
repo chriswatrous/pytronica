@@ -13,7 +13,7 @@ from controller import Controller
 import sig
 
 # new architecture
-from generator import Silence, NoOp
+from misc import Silence, NoOp
 from buffernode import mem_report, mem_report_clear
 from osc import Saw
 from modifiers import Pan
