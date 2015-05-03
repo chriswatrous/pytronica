@@ -1,5 +1,5 @@
 from libc.stdio cimport putc, FILE, fopen, EOF, fclose, printf
-from libc.string cimport memset
+from libc.string cimport memset, memcpy
 from libc.math cimport cos, sqrt
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 
@@ -47,7 +47,7 @@ def mem_report_clear():
 
 
 cdef class BufferNode(object):
-    """A linked list node that hold sample data and provides a mechanism for getting or generating the 
+    """A linked list node that hold sample data and provides a mechanism for getting or generating the
     next node and recycling nodes that are no longer used."""
 
     def __cinit__(self, Generator generator, int channels):
@@ -86,6 +86,21 @@ cdef class BufferNode(object):
         self.has_more = True
         self.length = 0
         self._uses = 0
+
+    cdef clear(self):
+        if self._left == NULL or self._right == NULL:
+            raise IndexError('This BufferNode was created with 0 channels.')
+        memset(self._left, 0, BUFFER_SIZE * sizeof(double))
+        if self._right != self._left:
+            memset(self._right, 0, BUFFER_SIZE * sizeof(double))
+
+    cdef copyfrom(self, BufferNode buf):
+        if buf.channels != self.channels:
+            fmt = "Number of channels doesn't match. (self: {}  buf: {})"
+            raise TypeError(fmt.format(self.channels, buf.channels))
+        memcpy(self._left, buf._left, BUFFER_SIZE * sizeof(double))
+        if self._right != self._left:
+            memcpy(self._right, buf._right, BUFFER_SIZE * sizeof(double))
 
     cdef double *get_left(self) except NULL:
         """Get a pointer to the left buffer."""

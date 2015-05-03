@@ -1,155 +1,188 @@
+from __future__ import division
+
 from libc.string cimport memset
 
-from sig cimport Signal, BufferSignal
+#from sig cimport Signal, BufferSignal
+from generator cimport Generator
+from buffernode cimport BufferNode
 from c_util cimport imax, imin
+
+#from compose import Compose
 
 include "constants.pxi"
 
-from compose import Compose
-
-cdef class Layer(BufferSignal):
+cdef class Layer(Generator):
     cdef object inputs
     cdef double offset
 
-    def __init__(self, *args):
-        cdef Signal sig
+    cdef object _input_bufs
 
+    def __cinit__(self, inputs=None):
         self.inputs = []
+        self._input_bufs = []
         self.offset = 0
+        if inputs:
+            map(self.add, inputs)
 
-        for arg in args:
-            self.add(arg)
-
-    def add(self, inp):
-        cdef Signal sig
+    def add(self, input):
+        cdef Generator gen
         cdef Layer layer
 
-        if hasattr(inp, '__iter__'):
-            for x in inp:
-                self.add(x)
-        elif issubclass(type(inp), Layer):
-            layer = inp
-            self.add(layer.inputs)
-            self.offset += layer.offset
-        elif issubclass(type(inp), Signal):
-            sig = inp
-            self.inputs.append(sig)
-            if not self.is_stereo() and sig.is_stereo():
-                self.make_stereo()
+        #if issubclass(type(input), Layer):
+            #layer = input
+            #map(self.add, layer.inputs)
+            #self.offset += layer.offset
+        #elif issubclass(type(input), Generator):
+        if issubclass(type(input), Generator):
+            gen = input
+            self.inputs.append(gen)
+            self._input_bufs.append(gen.get_starter())
         else:
-            self.offset += inp
+            self.offset += input
 
-    cdef int generate(self) except -1:
-        cdef Signal inp
-        cdef int i, length, max_length
+    cdef bint is_stereo(self) except -1:
+        cdef Generator gen
 
-        cdef bint stereo = self.is_stereo()
+        if not self.inputs:
+            raise IndexError('Layer object has no inputs')
 
-        # Clear the buffer(s).
-        memset(self.left, 0, BUFFER_SIZE * sizeof(double))
-        if stereo:
-            memset(self.right, 0, BUFFER_SIZE * sizeof(double))
+        for gen in self.inputs:
+            if gen.is_stereo():
+                return True
 
-        done_signals = []
+        return False
+
+    cdef generate(self, BufferNode buf):
+        cdef BufferNode input_buf
+        cdef int i, max_length
+        cdef double *left
+        cdef double *right
+        cdef double *input_left
+        cdef double *input_right
+        cdef bint first
+
+        first = True
         max_length = 0
+        done_bufs = []
 
-        for inp in self.inputs:
-            length = inp.generate()
+        left = buf.get_left()
+        right = buf.get_right()
 
-            if length == 0:
-                done_signals.append(inp)
+        # Get next set of input bufers.
+        self._input_bufs = [(<BufferNode>x).get_next() for x in self._input_bufs]
 
-            max_length = imax(max_length, length)
+        # Add in the input signals.
+        for input_buf in self._input_bufs:
+            max_length = imax(max_length, input_buf.length)
 
-            for i in range(length):
-                self.left[i] += inp.left[i]
-            if stereo:
-                for i in range(length):
-                    self.right[i] += inp.right[i]
+            input_left = input_buf.get_left()
+            input_right = input_buf.get_right()
 
-        if self.offset != 0:
-            for i in range(max_length):
-                self.left[i] += self.offset
-            if stereo:
-                for i in range(max_length):
-                    self.right[i] += self.offset
-
-        for sig in done_signals:
-            self.inputs.remove(sig)
-
-        return max_length
-
-
-cdef class Multiply(BufferSignal):
-    cdef Signal inp1, inp2
-    cdef double constant_factor
-
-    def __init__(self, inp1, inp2):
-        cdef Signal sig
-
-        inputs = []
-        self.constant_factor = 1
-        for inp in [inp1, inp2]:
-            if issubclass(type(inp), Signal):
-                inputs.append(inp)
+            if first:
+                first = False
+                buf.copyfrom(input_buf)
             else:
-                self.constant_factor = inp
+                if buf.channels == 2:
+                    for i in range(input_buf.length):
+                        left[i] = left[i] + input_left[i]
+                        right[i] = right[i] + input_right[i]
+                else:
+                    for i in range(input_buf.length):
+                        #left[i] += input_left[i]
+                        left[i] = left[i] + input_left[i]
 
-        if len(inputs) == 0:
-            raise TypeError('At least one input must be a Signal.')
+            if not input_buf.has_more:
+                done_bufs.append(input_buf)
 
-        if len(inputs) == 2:
-            self.inp1, self.inp2 = inputs
-        else:
-            self.inp1 = inputs[0]
-            self.inp2 = None
+        # Add in the constant offset.
+        if self.offset != 0:
+            if buf.channels == 2:
+                for i in range(max_length):
+                    left[i] += self.offset
+                    right[i] += self.offset
+            else:
+                for i in range(max_length):
+                    left[i] += self.offset
 
-        for sig in inputs:
-            if sig.is_stereo():
-                self.make_stereo()
-                break
+        # Remove the done inputs.
+        for buf in done_bufs:
+            self._input_bufs.remove(buf)
 
-    cdef int generate(self) except -1:
-        cdef int i, length
-
-        if self.inp2:
-            length = imin(self.inp1.generate(), self.inp2.generate())
-            for i in range(length):
-                self.left[i] = self.inp1.left[i] * self.inp2.left[i]
-            if self.is_stereo():
-                for i in range(length):
-                    self.right[i] = self.inp1.right[i] * self.inp2.right[i]
-        else:
-            length = self.inp1.generate()
-            for i in range(length):
-                self.left[i] = self.inp1.left[i] * self.constant_factor
-            if self.is_stereo():
-                for i in range(length):
-                    self.right[i] = self.inp1.right[i] * self.constant_factor
-
-        return length
+        buf.length = max_length
+        buf.has_more = bool(self._input_bufs)
 
 
-cdef class Chain(Signal):
-    cdef Signal comp
-
-    def __init__(self, inputs=None):
-        self.comp = Compose()
-        self.mlength = 0
-
-        if inputs:
-            for inp in inputs:
-                self.add(inp)
-
-    def add(self, Signal inp):
-        if inp.mlength == None:
-            raise ValueError('mlength not set')
-        self.comp.add(inp, self.mlength)
-        self.mlength += inp.mlength
-
-        # The Compose might switch from mono to stereo after adding a stereo Signal.
-        self.left = self.comp.left
-        self.right = self.comp.right
-
-    cdef int generate(self) except -1:
-        return self.comp.generate()
+#cdef class Multiply(BufferSignal):
+    #cdef Signal inp1, inp2
+    #cdef double constant_factor
+#
+    #def __init__(self, inp1, inp2):
+        #cdef Signal sig
+#
+        #inputs = []
+#
+        #self.constant_factor = 1
+        #for input in [inp1, inp2]:
+            #if issubclass(type(input), Signal):
+                #inputs.append(input)
+            #else:
+                #self.constant_factor = input
+#
+        #if len(inputs) == 0:
+            #raise TypeError('At least one input must be a Signal.')
+#
+        #if len(inputs) == 2:
+            #self.inp1, self.inp2 = inputs
+        #else:
+            #self.inp1 = inputs[0]
+            #self.inp2 = None
+#
+        #for sig in inputs:
+            #if sig.is_stereo():
+                #self.make_stereo()
+                #break
+#
+    #cdef int generate(self) except -1:
+        #cdef int i, length
+#
+        #if self.inp2:
+            #length = imin(self.inp1.generate(), self.inp2.generate())
+            #for i in range(length):
+                #self.left[i] = self.inp1.left[i] * self.inp2.left[i]
+            #if self.is_stereo():
+                #for i in range(length):
+                    #self.right[i] = self.inp1.right[i] * self.inp2.right[i]
+        #else:
+            #length = self.inp1.generate()
+            #for i in range(length):
+                #self.left[i] = self.inp1.left[i] * self.constant_factor
+            #if self.is_stereo():
+                #for i in range(length):
+                    #self.right[i] = self.inp1.right[i] * self.constant_factor
+#
+        #return length
+#
+#
+#cdef class Chain(Signal):
+    #cdef Signal comp
+#
+    #def __init__(self, inputs=None):
+        #self.comp = Compose()
+        #self.mlength = 0
+#
+        #if inputs:
+            #for input in inputs:
+                #self.add(input)
+#
+    #def add(self, Signal input):
+        #if input.mlength == None:
+            #raise ValueError('mlength not set')
+        #self.comp.add(input, self.mlength)
+        #self.mlength += input.mlength
+#
+        ## The Compose might switch from mono to stereo after adding a stereo Signal.
+        #self.left = self.comp.left
+        #self.right = self.comp.right
+#
+    #cdef int generate(self) except -1:
+        #return self.comp.generate()

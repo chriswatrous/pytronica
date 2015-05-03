@@ -1,6 +1,3 @@
-from sig cimport BufferSignal
-from sig import BufferSignal
-
 from generator cimport Generator
 from buffernode cimport BufferNode
 

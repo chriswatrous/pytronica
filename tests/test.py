@@ -113,7 +113,9 @@ class Tests(unittest.TestCase):
         ch.add(a)
         (.5*ch).play()
 
-    def test_new_arch(self):
+
+class NewArchTests(unittest.TestCase):
+    def test_saw_pan(self):
         s = Saw(220, .2)
         p1 = Pan(s, .5)
         p2 = Pan(s, -.5)
@@ -121,6 +123,12 @@ class Tests(unittest.TestCase):
         #mem_report()
         p2.play()
         #mem_report()
+
+    def test_layer(self):
+        a = Saw(note_freq('C4'), .2) + Saw(note_freq('E4'), .2)
+        b = a + 1
+        a.play()
+        b.play()
 
 
 class ErrorTests(unittest.TestCase):

@@ -6,6 +6,7 @@ from random import randrange
 from time import time
 
 from buffernode cimport BufferNode
+from combiners import Layer
 
 include "constants.pxi"
 
@@ -29,6 +30,15 @@ cdef class Generator(object):
     def __cinit__(self):
         self.sample_rate = _sample_rate
         self.starter = None
+
+    def __add__(a, b):
+        try:
+            l = Layer()
+            l.add(a)
+            l.add(b)
+            return l
+        except TypeError:
+            return NotImplemented
 
     cdef bint is_stereo(self) except -1:
         raise NotImplementedError

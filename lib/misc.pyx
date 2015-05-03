@@ -17,7 +17,7 @@ cdef class Silence(Generator):
         return False
 
     cdef generate(self, BufferNode buf):
-        memset(buf.get_left(), 0, BUFFER_SIZE * sizeof(double))
+        buf.clear()
 
         if self.samples_left <= BUFFER_SIZE:
             buf.has_more = False
