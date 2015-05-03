@@ -10,7 +10,6 @@ from compose import Compose
 from envelopes import ExpDecay, LinearDecay
 from combiners import Layer, Chain
 from controller import Controller
-import sig
 
 # new architecture
 from misc import Silence, NoOp

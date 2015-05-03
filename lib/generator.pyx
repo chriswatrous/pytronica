@@ -1,17 +1,13 @@
+from __future__ import division
 from libc.stdio cimport putc, FILE, fopen, EOF, fclose, printf
-from libc.math cimport cos, sqrt
-from cpython.mem cimport PyMem_Malloc, PyMem_Free
 
 from subprocess import call, Popen
 from random import randrange
 from time import time
 
-from c_util cimport dmax, imax
 from buffernode cimport BufferNode
-from buffernode import BufferNode
 
 include "constants.pxi"
-
 
 # Sample rate stuff:
 cdef double _sample_rate = 48000
@@ -139,6 +135,7 @@ cdef class Generator(object):
     cdef report_clipping(self, double sample):
         if sample < 0:
             sample *= -1
+
         if sample > self._clip_max:
             self._clip_max = sample
             print 'Clipping! (max value = {})'.format(self._clip_max)
