@@ -114,13 +114,13 @@ class Tests(unittest.TestCase):
         (.5*ch).play()
 
     def test_new_arch(self):
-        s = Saw2(220, 1)
+        s = Saw(220, .2)
         p1 = Pan2(s, .5)
         p2 = Pan2(s, -.5)
         p1.play()
-        mem_report()
+        #mem_report()
         p2.play()
-        mem_report()
+        #mem_report()
 
 
 class ErrorTests(unittest.TestCase):

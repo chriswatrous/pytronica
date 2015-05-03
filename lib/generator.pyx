@@ -155,56 +155,6 @@ cdef class Generator(object):
         return time() - t
 
 
-# Measured at 180us/s.
-cdef class Saw2(Generator):
-    cdef double step
-    cdef double value
-    cdef long remaining_samples
-    cdef bint finite
-
-    def __init__(self, freq, length=None, phase=0):
-        super(Saw2, self).__init__(self)
-
-        self.step = 2 * freq / self.sample_rate
-
-        self.value = phase * 2
-        if self.value > 1:
-            self.value -= 2
-        if length != None:
-            self.finite = True
-            self.remaining_samples = length * self.sample_rate
-        else:
-            self.finite = False
-
-    cdef bint is_stereo(self) except -1:
-        return False
-
-    cdef generate(self, BufferNode buf):
-        cdef int i, length
-        cdef double *left
-
-        if self.finite and self.remaining_samples <= 0:
-            return 0
-
-        if self.finite and self.remaining_samples <= BUFFER_SIZE:
-            length = self.remaining_samples
-        else:
-            length = BUFFER_SIZE
-
-        left = buf.get_left()
-
-        left[0] = self.value
-        for i in range(1, length):
-            left[i] = left[i-1] + self.step
-            if left[i] > 1:
-                left[i] -= 2
-        self.value = left[length-1] + self.step
-
-        self.remaining_samples -= length
-
-        buf.length = length
-        buf.has_more = not self.finite or self.remaining_samples > 0
-
 
 # Measured at 91us/s with NoOp as input.
 cdef class Pan2(Generator):

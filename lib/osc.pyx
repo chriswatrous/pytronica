@@ -1,90 +1,53 @@
-from sig cimport BufferSignal 
+from sig cimport BufferSignal
 from sig import BufferSignal
+
+from generator cimport Generator
+from buffernode cimport BufferNode
 
 include "constants.pxi"
 
-cdef class Saw(BufferSignal):
+# Measured at 180us/s.
+cdef class Saw(Generator):
     cdef double step
     cdef double value
     cdef long remaining_samples
     cdef bint finite
 
-    def __init__(self, freq, length=None, phase=0):
-        super(Saw, self).__init__(self)
-
+    def __cinit__(self, freq, length=None, phase=0):
         self.step = 2 * freq / self.sample_rate
+        self.value = (2 * phase + 1) % 2 - 1
 
-        self.value = phase * 2
-        if self.value > 1:
-            self.value -= 2
         if length != None:
             self.finite = True
             self.remaining_samples = length * self.sample_rate
         else:
             self.finite = False
 
-    cdef int generate(self) except -1:
+    cdef bint is_stereo(self) except -1:
+        return False
+
+    cdef generate(self, BufferNode buf):
         cdef int i, length
+        cdef double *left
 
-        if self.finite and self.remaining_samples <= 0:
-            return 0
+        left = buf.get_left()
 
+        # Determine length of this frame.
         if self.finite and self.remaining_samples <= BUFFER_SIZE:
             length = self.remaining_samples
         else:
             length = BUFFER_SIZE
 
-        for i in range(length):
-            self.left[i] = self.value
-            self.value += self.step
-            if self.value > 1:
-                self.value -= 2
+        # Fill the buffer.
+        left[0] = self.value
+        if left[0] > 1:
+            left[0] -= 2
+        for i in range(1, length):
+            left[i] = left[i-1] + self.step
+            if left[i] > 1:
+                left[i] -= 2
 
+        self.value = left[length-1] + self.step
         self.remaining_samples -= length
-
-        return length
-
-
-#cdef class Saw2(Generator):
-    #cdef double step
-    #cdef double value
-    #cdef long remaining_samples
-    #cdef bint finite
-#
-    #def __init__(self, freq, length=None, phase=0):
-        #super(Saw2, self).__init__(self)
-#
-        #self.step = 2 * freq / self.sample_rate
-#
-        #self.value = phase * 2
-        #if self.value > 1:
-            #self.value -= 2
-        #if length != None:
-            #self.finite = True
-            #self.remaining_samples = length * self.sample_rate
-        #else:
-            #self.finite = False
-#
-    #cdef bint is_stereo():
-        #return false
-#
-    #cdef generate(self, SampleBuffer buf):
-        #cdef int i, length
-#
-        #if self.finite and self.remaining_samples <= 0:
-            #return 0
-#
-        #if self.finite and self.remaining_samples <= BUFFER_SIZE:
-            #length = self.remaining_samples
-        #else:
-            #length = BUFFER_SIZE
-#
-        #for i in range(length):
-            #buf.left[i] = self.value
-            #self.value += self.step
-            #if self.value > 1:
-                #self.value -= 2
-#
-        #self.remaining_samples -= length
-#
-        #return length
+        buf.length = length
+        buf.has_more = not self.finite or self.remaining_samples > 0

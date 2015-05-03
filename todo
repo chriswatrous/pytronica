@@ -86,7 +86,7 @@ To Do:
 
 Doing:
     new architecture:
-        move BufferNode to separate file
+        move NoOp and Silence to a new file
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -112,3 +112,5 @@ Done:
     new architecture:
         linked lists of sample buffers
         recycle linked list nodes
+        move BufferNode to separate file
+        replace Saw with Saw2 from the new architecture
