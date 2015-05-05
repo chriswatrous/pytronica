@@ -1,8 +1,6 @@
 from generator cimport Generator
-#cdef class Generator(object):
-    #pass
 
-cdef class BufferNode(object):
+cdef class BufferNode:
     cdef Generator generator
     cdef BufferNode next
     cdef int channels

@@ -46,7 +46,7 @@ def mem_report_clear():
     _freed_buffers = 0
 
 
-cdef class BufferNode(object):
+cdef class BufferNode:
     """A linked list node that hold sample data and provides a mechanism for getting or generating the
     next node and recycling nodes that are no longer used."""
 

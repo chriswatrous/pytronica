@@ -24,7 +24,7 @@ def get_sample_rate():
     return _sample_rate
 
 
-cdef class Generator(object):
+cdef class Generator:
     """Abstract base class for objects that generate (or modify) sample data."""
 
     def __cinit__(self):

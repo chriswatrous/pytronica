@@ -70,7 +70,7 @@ cdef class Controller(BufferSignal):
         return BUFFER_SIZE
 
 
-cdef class ControlMoveQueue(object):
+cdef class ControlMoveQueue:
     cdef object moves
     cdef double current_time, sample_rate
     cdef long current_sample
@@ -108,7 +108,7 @@ cdef class ControlMoveQueue(object):
         return len(self.moves) != 0
 
 
-cdef class BufferFiller(object):
+cdef class BufferFiller:
     cdef long length
     cdef double value
 

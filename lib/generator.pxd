@@ -1,10 +1,7 @@
 from libc.stdio cimport FILE
 from buffernode cimport BufferNode
 
-#cdef class BufferNode(object):
-    #pass
-
-cdef class Generator(object):
+cdef class Generator:
     cdef double sample_rate
     cdef BufferNode starter
     cdef BufferNode spare
