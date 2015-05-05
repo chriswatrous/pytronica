@@ -12,14 +12,14 @@ include "constants.pxi"
 
 cdef class Layer(Generator):
     cdef object inputs
-    cdef double offset
+    cdef double C
 
     cdef object _input_bufs
 
     def __cinit__(self, inputs=None):
         self.inputs = []
         self._input_bufs = []
-        self.offset = 0
+        self.C = 0
         if inputs:
             map(self.add, inputs)
 
@@ -32,7 +32,7 @@ cdef class Layer(Generator):
             self.inputs.append(gen)
             self._input_bufs.append(gen.get_starter())
         else:
-            self.offset += input
+            self.C += input
 
     cdef bint is_stereo(self) except -1:
         cdef Generator gen
@@ -57,14 +57,15 @@ cdef class Layer(Generator):
         R = buf.get_right()
 
         # Get next set of input bufers.
-        self._input_bufs = [(<BufferNode>x).get_next() for x in self._input_bufs]
+        for i in range(len(self._input_bufs)):
+            self._input_bufs[i] = self._input_bufs[i].get_next()
 
         # Add in the input signals.
         for input_buf in self._input_bufs:
             max_length = imax(max_length, input_buf.length)
 
-            inputL = input_buf.get_left()
-            inputR = input_buf.get_right()
+            AL = input_buf.get_left()
+            AR = input_buf.get_right()
 
             if first:
                 first = False
@@ -72,24 +73,24 @@ cdef class Layer(Generator):
             else:
                 if buf.channels == 2:
                     for i in range(input_buf.length):
-                        L[i] = L[i] + inputL[i]
-                        R[i] = R[i] + inputR[i]
+                        L[i] += AL[i]
+                        R[i] += AR[i]
                 else:
                     for i in range(input_buf.length):
-                        L[i] = L[i] + inputL[i]
+                        L[i] += AL[i]
 
             if not input_buf.has_more:
                 done_bufs.append(input_buf)
 
         # Add in the constant offset.
-        if self.offset != 0:
+        if self.C != 0:
             if buf.channels == 2:
                 for i in range(max_length):
-                    L[i] += self.offset
-                    R[i] += self.offset
+                    L[i] += self.C
+                    R[i] += self.C
             else:
                 for i in range(max_length):
-                    L[i] += self.offset
+                    L[i] += self.C
 
         # Remove the done inputs.
         for x in done_bufs:
@@ -129,17 +130,17 @@ cdef class ConstMultiply(Generator):
         # Get pointers.
         L = buf.get_left()
         R = buf.get_right()
-        inputL = self.A.get_left()
-        inputR = self.A.get_right()
+        AL = self.A.get_left()
+        AR = self.A.get_right()
 
         # Do multiply.
         if buf.channels == 2:
             for i in range(self.A.length):
-                L[i] = self.C * inputL[i]
-                R[i] = self.C * inputR[i]
+                L[i] = self.C * AL[i]
+                R[i] = self.C * AR[i]
         else:
             for i in range(self.A.length):
-                L[i] = self.C * inputL[i]
+                L[i] = self.C * AL[i]
 
         buf.length = self.A.length
         buf.has_more = self.A.has_more
@@ -161,23 +162,23 @@ cdef class Multiply(Generator):
         self.B = self.B.get_next()
 
         # Get pointers.
-        left = buf.get_left()
-        right = buf.get_right()
-        A_left = self.A.get_left()
-        A_right = self.A.get_right()
-        B_left = self.B.get_left()
-        B_right = self.B.get_right()
+        L = buf.get_left()
+        R = buf.get_right()
+        AL = self.A.get_left()
+        AR = self.A.get_right()
+        BL = self.B.get_left()
+        BR = self.B.get_right()
 
         length = imin(self.A.length, self.B.length)
 
         # Do multiply.
         if buf.channels == 2:
             for i in range(length):
-                left[i] = A_left[i] * B_left[i]
-                right[i] = A_right[i] * B_right[i]
+                L[i] = AL[i] * BL[i]
+                R[i] = AR[i] * BR[i]
         else:
             for i in range(length):
-                left[i] = A_left[i] * B_left[i]
+                L[i] = AL[i] * BL[i]
 
         buf.length = length
         buf.has_more = self.A.has_more and self.B.has_more
