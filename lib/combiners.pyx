@@ -2,7 +2,6 @@ from __future__ import division
 
 from libc.string cimport memset
 
-#from sig cimport Signal, BufferSignal
 from generator cimport Generator
 from buffernode cimport BufferNode
 from c_util cimport imax, imin
