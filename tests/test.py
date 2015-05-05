@@ -127,7 +127,6 @@ class NewArchTests(unittest.TestCase):
         b = a + 1.9
         a.play()
         b.play()
-        mem_report()
 
     def test_const_mul(self):
         a = Saw(note_freq('C4'), .2) * .25

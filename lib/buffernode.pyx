@@ -102,6 +102,9 @@ cdef class BufferNode(object):
         if self._right != self._left:
             memcpy(self._right, buf._right, BUFFER_SIZE * sizeof(double))
 
+    # Keep these as functions rather than fields. This encourages saving the pointer as a local variable.
+    # In a tight loop, using the pointer in a local variable is a little faster than getting the pointer
+    # from an object field every iteration of the loop. (confirmed by testing)
     cdef double *get_left(self) except NULL:
         """Get a pointer to the left buffer."""
         if self._left == NULL:

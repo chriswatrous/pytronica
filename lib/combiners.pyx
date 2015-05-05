@@ -49,19 +49,13 @@ cdef class Layer(Generator):
 
     cdef generate(self, BufferNode buf):
         cdef BufferNode input_buf
-        cdef int i, max_length
-        cdef double *left
-        cdef double *right
-        cdef double *input_left
-        cdef double *input_right
-        cdef bint first
 
         first = True
         max_length = 0
         done_bufs = []
 
-        left = buf.get_left()
-        right = buf.get_right()
+        L = buf.get_left()
+        R = buf.get_right()
 
         # Get next set of input bufers.
         self._input_bufs = [(<BufferNode>x).get_next() for x in self._input_bufs]
@@ -70,8 +64,8 @@ cdef class Layer(Generator):
         for input_buf in self._input_bufs:
             max_length = imax(max_length, input_buf.length)
 
-            input_left = input_buf.get_left()
-            input_right = input_buf.get_right()
+            inputL = input_buf.get_left()
+            inputR = input_buf.get_right()
 
             if first:
                 first = False
@@ -79,12 +73,11 @@ cdef class Layer(Generator):
             else:
                 if buf.channels == 2:
                     for i in range(input_buf.length):
-                        left[i] = left[i] + input_left[i]
-                        right[i] = right[i] + input_right[i]
+                        L[i] = L[i] + inputL[i]
+                        R[i] = R[i] + inputR[i]
                 else:
                     for i in range(input_buf.length):
-                        #left[i] += input_left[i]
-                        left[i] = left[i] + input_left[i]
+                        L[i] = L[i] + inputL[i]
 
             if not input_buf.has_more:
                 done_bufs.append(input_buf)
@@ -93,11 +86,11 @@ cdef class Layer(Generator):
         if self.offset != 0:
             if buf.channels == 2:
                 for i in range(max_length):
-                    left[i] += self.offset
-                    right[i] += self.offset
+                    L[i] += self.offset
+                    R[i] += self.offset
             else:
                 for i in range(max_length):
-                    left[i] += self.offset
+                    L[i] += self.offset
 
         # Remove the done inputs.
         for x in done_bufs:
@@ -121,44 +114,36 @@ def mul(a, b):
 
 
 cdef class ConstMultiply(Generator):
-    cdef Generator input
-    cdef BufferNode input_buf
-    cdef double const_factor
+    cdef BufferNode A
+    cdef double C
 
     def __init__(self, input, const_factor):
-        self.input = input
-        self.input_buf = input.get_starter()
-        self.const_factor = const_factor
+        self.A = input.get_starter()
+        self.C = const_factor
 
     cdef bint is_stereo(self) except -1:
-        return self.input.is_stereo()
+        return self.A.generator.is_stereo()
 
     cdef generate(self, BufferNode buf):
-        cdef int i, length
-        cdef double *left
-        cdef double *right
-        cdef double *input_left
-        cdef double *input_right
-
-        self.input_buf = self.input_buf.get_next()
+        self.A = self.A.get_next()
 
         # Get pointers.
-        left = buf.get_left()
-        right = buf.get_right()
-        input_left = self.input_buf.get_left()
-        input_right = self.input_buf.get_right()
+        L = buf.get_left()
+        R = buf.get_right()
+        inputL = self.A.get_left()
+        inputR = self.A.get_right()
 
         # Do multiply.
         if buf.channels == 2:
-            for i in range(self.input_buf.length):
-                left[i] = self.const_factor * input_left[i]
-                right[i] = self.const_factor * input_right[i]
+            for i in range(self.A.length):
+                L[i] = self.C * inputL[i]
+                R[i] = self.C * inputR[i]
         else:
-            for i in range(self.input_buf.length):
-                left[i] = self.const_factor * input_left[i]
+            for i in range(self.A.length):
+                L[i] = self.C * inputL[i]
 
-        buf.length = self.input_buf.length
-        buf.has_more = self.input_buf.has_more
+        buf.length = self.A.length
+        buf.has_more = self.A.has_more
 
 
 cdef class Multiply(Generator):
@@ -173,14 +158,6 @@ cdef class Multiply(Generator):
         return self.A.generator.is_stereo() or self.B.generator.is_stereo()
 
     cdef generate(self, BufferNode buf):
-        cdef int i, length
-        cdef double *left
-        cdef double *right
-        cdef double *A_left
-        cdef double *A_right
-        cdef double *B_left
-        cdef double *B_right
-
         self.A = self.A.get_next()
         self.B = self.B.get_next()
 

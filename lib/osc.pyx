@@ -24,10 +24,10 @@ cdef class Saw(Generator):
         return False
 
     cdef generate(self, BufferNode buf):
+        # For some reason it needs these declarations or it will make them objects.
         cdef int i, length
-        cdef double *left
 
-        left = buf.get_left()
+        L = buf.get_left()
 
         # Determine length of this frame.
         if self.finite and self.remaining_samples <= BUFFER_SIZE:
@@ -35,16 +35,19 @@ cdef class Saw(Generator):
         else:
             length = BUFFER_SIZE
 
-        # Fill the buffer.
-        left[0] = self.value
-        if left[0] > 1:
-            left[0] -= 2
-        for i in range(1, length):
-            left[i] = left[i-1] + self.step
-            if left[i] > 1:
-                left[i] -= 2
+        # Set the first value.
+        L[0] = self.value
+        if L[0] > 1:
+            L[0] -= 2
 
-        self.value = left[length-1] + self.step
+        # Fill in the rest of the values.
+        for i in range(1, length):
+            L[i] = L[i-1] + self.step
+            if L[i] > 1:
+                L[i] -= 2
+
+        self.value = L[length-1] + self.step
         self.remaining_samples -= length
+
         buf.length = length
         buf.has_more = not self.finite or self.remaining_samples > 0

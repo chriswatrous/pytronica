@@ -75,12 +75,12 @@ def measure(s, total_seconds):
 
 
 def measure_layer():
-    measure('Saw(220, 360)', 360)
-    measure('Saw(220, 360) + Saw(330, 360)', 360)
-    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360)', 360)
-    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)', 360)
-    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)', 360)
-    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)', 360)
+    #measure('Saw(220, 360)', 360)
+    #measure('Saw(220, 360) + Saw(330, 360)', 360)
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360)', 360)
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)', 360)
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)', 360)
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)', 360)
 
     measure('(lambda x: x)(Saw(220, 360))', 360)
     measure('(lambda x: x+x)(Saw(220, 360))', 360)
@@ -89,16 +89,25 @@ def measure_layer():
     measure('(lambda x: x+x+x+x+x)(Saw(220, 360))', 360)
     measure('(lambda x: x+x+x+x+x+x)(Saw(220, 360))', 360)
 
-    measure('NoOp(360)', 360)
-    measure('NoOp(360) + NoOp(360)', 360)
-    measure('NoOp(360)' + ' + NoOp(360)'*2, 360)
-    measure('NoOp(360)' + ' + NoOp(360)'*3, 360)
-    measure('NoOp(360)' + ' + NoOp(360)'*4, 360)
-    measure('NoOp(360)' + ' + NoOp(360)'*5, 360)
+    #measure('NoOp(360)', 360)
+    #measure('NoOp(360) + NoOp(360)', 360)
+    #measure('NoOp(360)' + ' + NoOp(360)'*2, 360)
+    #measure('NoOp(360)' + ' + NoOp(360)'*3, 360)
+    #measure('NoOp(360)' + ' + NoOp(360)'*4, 360)
+    #measure('NoOp(360)' + ' + NoOp(360)'*5, 360)
 
     mem_report()
 
-measure_layer()
+#measure_layer()
+
+
+def measure_multiply():
+    measure('Saw(220, 360)', 360)
+    measure('Saw(220, 360) * .25', 360)
+    measure('Saw(220, 360) * Saw(220, 360)', 360)
+    measure('(lambda x: x*x)(Saw(220, 360))', 360)
+    mem_report()
+measure_multiply()
 
 
 def test2():
