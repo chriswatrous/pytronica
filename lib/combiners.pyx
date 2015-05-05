@@ -28,11 +28,6 @@ cdef class Layer(Generator):
         cdef Generator gen
         cdef Layer layer
 
-        #if issubclass(type(input), Layer):
-            #layer = input
-            #map(self.add, layer.inputs)
-            #self.offset += layer.offset
-        #elif issubclass(type(input), Generator):
         if issubclass(type(input), Generator):
             gen = input
             self.inputs.append(gen)
@@ -112,57 +107,106 @@ cdef class Layer(Generator):
         buf.has_more = len(self._input_bufs) > 0
 
 
-#cdef class Multiply(BufferSignal):
-    #cdef Signal inp1, inp2
-    #cdef double constant_factor
-#
-    #def __init__(self, inp1, inp2):
-        #cdef Signal sig
-#
-        #inputs = []
-#
-        #self.constant_factor = 1
-        #for input in [inp1, inp2]:
-            #if issubclass(type(input), Signal):
-                #inputs.append(input)
-            #else:
-                #self.constant_factor = input
-#
-        #if len(inputs) == 0:
-            #raise TypeError('At least one input must be a Signal.')
-#
-        #if len(inputs) == 2:
-            #self.inp1, self.inp2 = inputs
-        #else:
-            #self.inp1 = inputs[0]
-            #self.inp2 = None
-#
-        #for sig in inputs:
-            #if sig.is_stereo():
-                #self.make_stereo()
-                #break
-#
-    #cdef int generate(self) except -1:
-        #cdef int i, length
-#
-        #if self.inp2:
-            #length = imin(self.inp1.generate(), self.inp2.generate())
-            #for i in range(length):
-                #self.left[i] = self.inp1.left[i] * self.inp2.left[i]
-            #if self.is_stereo():
-                #for i in range(length):
-                    #self.right[i] = self.inp1.right[i] * self.inp2.right[i]
-        #else:
-            #length = self.inp1.generate()
-            #for i in range(length):
-                #self.left[i] = self.inp1.left[i] * self.constant_factor
-            #if self.is_stereo():
-                #for i in range(length):
-                    #self.right[i] = self.inp1.right[i] * self.constant_factor
-#
-        #return length
-#
-#
+def mul(a, b):
+    a_gen = issubclass(type(a), Generator)
+    b_gen = issubclass(type(b), Generator)
+    if a_gen and b_gen:
+        return Multiply(a, b)
+    elif a_gen:
+        return ConstMultiply(a, b)
+    elif b_gen:
+        return ConstMultiply(b, a)
+    else:
+        raise TypeError
+
+
+cdef class ConstMultiply(Generator):
+    cdef Generator input
+    cdef BufferNode input_buf
+    cdef double const_factor
+
+    def __init__(self, input, const_factor):
+        self.input = input
+        self.input_buf = input.get_starter()
+        self.const_factor = const_factor
+
+    cdef bint is_stereo(self) except -1:
+        return self.input.is_stereo()
+
+    cdef generate(self, BufferNode buf):
+        cdef int i, length
+        cdef double *left
+        cdef double *right
+        cdef double *input_left
+        cdef double *input_right
+
+        self.input_buf = self.input_buf.get_next()
+
+        # Get pointers.
+        left = buf.get_left()
+        right = buf.get_right()
+        input_left = self.input_buf.get_left()
+        input_right = self.input_buf.get_right()
+
+        # Do multiply.
+        if buf.channels == 2:
+            for i in range(self.input_buf.length):
+                left[i] = self.const_factor * input_left[i]
+                right[i] = self.const_factor * input_right[i]
+        else:
+            for i in range(self.input_buf.length):
+                left[i] = self.const_factor * input_left[i]
+
+        buf.length = self.input_buf.length
+        buf.has_more = self.input_buf.has_more
+
+
+cdef class Multiply(Generator):
+    cdef BufferNode A
+    cdef BufferNode B
+
+    def __init__(self, a, b):
+        self.A = a.get_starter()
+        self.B = b.get_starter()
+
+    cdef bint is_stereo(self) except -1:
+        return self.A.generator.is_stereo() or self.B.generator.is_stereo()
+
+    cdef generate(self, BufferNode buf):
+        cdef int i, length
+        cdef double *left
+        cdef double *right
+        cdef double *A_left
+        cdef double *A_right
+        cdef double *B_left
+        cdef double *B_right
+
+        self.A = self.A.get_next()
+        self.B = self.B.get_next()
+
+        # Get pointers.
+        left = buf.get_left()
+        right = buf.get_right()
+        A_left = self.A.get_left()
+        A_right = self.A.get_right()
+        B_left = self.B.get_left()
+        B_right = self.B.get_right()
+
+        length = imin(self.A.length, self.B.length)
+
+        # Do multiply.
+        if buf.channels == 2:
+            for i in range(length):
+                left[i] = A_left[i] * B_left[i]
+                right[i] = A_right[i] * B_right[i]
+        else:
+            for i in range(length):
+                left[i] = A_left[i] * B_left[i]
+
+        buf.length = length
+        buf.has_more = self.A.has_more and self.B.has_more
+
+
 #cdef class Chain(Signal):
     #cdef Signal comp
 #

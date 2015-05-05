@@ -89,6 +89,13 @@ def measure_layer():
     measure('(lambda x: x+x+x+x+x)(Saw(220, 360))', 360)
     measure('(lambda x: x+x+x+x+x+x)(Saw(220, 360))', 360)
 
+    measure('NoOp(360)', 360)
+    measure('NoOp(360) + NoOp(360)', 360)
+    measure('NoOp(360)' + ' + NoOp(360)'*2, 360)
+    measure('NoOp(360)' + ' + NoOp(360)'*3, 360)
+    measure('NoOp(360)' + ' + NoOp(360)'*4, 360)
+    measure('NoOp(360)' + ' + NoOp(360)'*5, 360)
+
     mem_report()
 
 measure_layer()

@@ -6,7 +6,7 @@ from random import randrange
 from time import time
 
 from buffernode cimport BufferNode
-from combiners import Layer
+from combiners import Layer, mul
 
 include "constants.pxi"
 
@@ -37,6 +37,12 @@ cdef class Generator(object):
             l.add(a)
             l.add(b)
             return l
+        except TypeError:
+            return NotImplemented
+
+    def __mul__(a, b):
+        try:
+            return mul(a, b)
         except TypeError:
             return NotImplemented
 

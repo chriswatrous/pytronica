@@ -90,6 +90,9 @@ To Do:
         Compose: make sure memory is freed properly when an input is done processing
         for any Generator where the length of self is longer than the length of one of it's inputs:
             make sure the inputs are deleted when they are done being used, so that the memory can be freed by gc
+    make BufferIter class that handles getting next BufferNode
+    make SampleBuffer class that just handles allocating and freeing the buffer memory
+    make BufferNode left and right pointers fields insted of functions that return pointers
 
 Doing:
     new architecture:
