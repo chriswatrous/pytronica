@@ -105,11 +105,11 @@ cdef class Layer(Generator):
                     left[i] += self.offset
 
         # Remove the done inputs.
-        for buf in done_bufs:
-            self._input_bufs.remove(buf)
+        for x in done_bufs:
+            self._input_bufs.remove(x)
 
         buf.length = max_length
-        buf.has_more = bool(self._input_bufs)
+        buf.has_more = len(self._input_bufs) > 0
 
 
 #cdef class Multiply(BufferSignal):

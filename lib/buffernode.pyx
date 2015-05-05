@@ -157,3 +157,11 @@ cdef class BufferNode(object):
                 self.reset()
 
         return next
+
+    def debug_print(self):
+        print self
+        print '   generator = ' + str(self.generator)
+        print '   channels = ' + str(self.channels)
+        print '   length = ' + str(self.length)
+        print '   has_more = ' + str(self.has_more)
+        print

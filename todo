@@ -80,15 +80,20 @@ To Do:
     rename internal/private methods and fields to start with underscore
     make sure all files import future division
     clip reporting options: none, end, instant
+    make sure every song within project adds pytronica/lib to the path from with in the code
+        don't depend on $PYTHONPATH
     new architecture:
         recycle linked list nodes
         Generator.set_no_recycle() method
         check that no new starters are given out after evaluation has started
         test error conditions
+        Compose: make sure memory is freed properly when an input is done processing
+        for any Generator where the length of self is longer than the length of one of it's inputs:
+            make sure the inputs are deleted when they are done being used, so that the memory can be freed by gc
 
 Doing:
     new architecture:
-        move Layer to the new architecture
+        adapt Multiply to new architecture
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -117,3 +122,4 @@ Done:
         move BufferNode to separate file
         replace Saw with Saw2 from the new architecture
         move NoOp and Silence to a new file
+        adapt Layer to the new architecture

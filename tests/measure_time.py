@@ -89,8 +89,10 @@ def measure_layer():
     measure('(lambda x: x+x+x+x+x)(Saw(220, 360))', 360)
     measure('(lambda x: x+x+x+x+x+x)(Saw(220, 360))', 360)
 
-#measure_layer()
-mem_report()
+    mem_report()
+
+measure_layer()
+
 
 def test2():
     print 'test2'
