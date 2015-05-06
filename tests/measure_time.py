@@ -7,52 +7,59 @@ from audio import *
 
 
 def main():
-    #measure_stuff()
-    measure_layer()
+    measure_stuff()
+    #measure_layer()
+    #measure_multiply()
+    #measure_envelopes()
 
 
 # Tests ------------------------------------------------------
 
 def measure_stuff():
-    measure('NoOp(360)', 360)
-    measure('Silence(36)', 360)
-    measure('Saw(220, 360)', 360)
-    measure('Pan(NoOp(360), -.5)', 360)
-    measure('Pan(Saw(220, 360), -.5)', 360)
+    #measure('NoOp(360)')
+    #measure('Silence(36)')
+    measure('Saw(220, 360)', 50)
+    #measure('Pan(NoOp(360), -.5)')
+    #measure('Pan(Saw(220, 360), -.5)')
     mem_report()
 
 
 def measure_layer():
-    #measure('Saw(220, 360)', 360)
-    #measure('Saw(220, 360) + Saw(330, 360)', 360)
-    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360)', 360)
-    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)', 360)
-    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)', 360)
-    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)', 360)
+    #measure('Saw(220, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
 
-    measure('(lambda x: x)(Saw(220, 360))', 360)
-    measure('(lambda x: x+x)(Saw(220, 360))', 360)
-    measure('(lambda x: x+x+x)(Saw(220, 360))', 360)
-    measure('(lambda x: x+x+x+x)(Saw(220, 360))', 360)
-    measure('(lambda x: x+x+x+x+x)(Saw(220, 360))', 360)
-    measure('(lambda x: x+x+x+x+x+x)(Saw(220, 360))', 360)
+    measure('(lambda x: x)(Saw(220, 360))')
+    measure('(lambda x: x+x)(Saw(220, 360))')
+    measure('(lambda x: x+x+x)(Saw(220, 360))')
+    measure('(lambda x: x+x+x+x)(Saw(220, 360))')
+    measure('(lambda x: x+x+x+x+x)(Saw(220, 360))')
+    measure('(lambda x: x+x+x+x+x+x)(Saw(220, 360))')
 
-    #measure('NoOp(360)', 360)
-    #measure('NoOp(360) + NoOp(360)', 360)
-    #measure('NoOp(360)' + ' + NoOp(360)'*2, 360)
-    #measure('NoOp(360)' + ' + NoOp(360)'*3, 360)
-    #measure('NoOp(360)' + ' + NoOp(360)'*4, 360)
-    #measure('NoOp(360)' + ' + NoOp(360)'*5, 360)
+    #measure('NoOp(360)')
+    #measure('NoOp(360) + NoOp(360)')
+    #measure('NoOp(360)' + ' + NoOp(360)'*2)
+    #measure('NoOp(360)' + ' + NoOp(360)'*3)
+    #measure('NoOp(360)' + ' + NoOp(360)'*4)
+    #measure('NoOp(360)' + ' + NoOp(360)'*5)
 
     mem_report()
 
 
 def measure_multiply():
-    measure('Saw(220, 360)', 360)
-    measure('Saw(220, 360) * .25', 360)
-    measure('Saw(220, 360) * Saw(220, 360)', 360)
-    measure('(lambda x: x*x)(Saw(220, 360))', 360)
+    measure('Saw(220, 360)')
+    measure('Saw(220, 360) * .25')
+    measure('Saw(220, 360) * Saw(220, 360)')
+    measure('(lambda x: x*x)(Saw(220, 360))')
     mem_report()
+
+
+def measure_envelopes():
+    measure('ExpDecay(10)', 100)
+    #measure('LinearDecay(360)')
 
 
 def test2():
@@ -126,12 +133,12 @@ def test_format_render_time():
 #test_format_render_time()
 
 
-def measure(s, total_seconds):
+def measure(s, reps=5):
     print s
     r = TimeReporter(indent=2)
-    for _ in range(5):
+    for _ in range(reps):
         a = eval(s)
-        r.report(a.measure_time() / total_seconds)
+        r.report(a.measure_rate())
     print
 
 

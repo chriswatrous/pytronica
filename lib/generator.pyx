@@ -170,3 +170,21 @@ cdef class Generator:
                 break
 
         return time() - t
+
+    def measure_rate(self):
+        cdef BufferIter it
+        cdef BufferNode buf
+        cdef long samples
+
+        samples = 0
+
+        t = time()
+
+        it = self.get_iter()
+        while True:
+            buf = it.get_next()
+            samples += buf.length
+            if not buf.has_more:
+                break
+
+        return (time() - t) / (samples / self.sample_rate)
