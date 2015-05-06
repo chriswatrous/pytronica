@@ -27,7 +27,8 @@ cdef class Saw(Generator):
 
     cdef generate(self, BufferNode buf):
         # For some reason it needs these declarations or it will make them objects.
-        cdef int i, length
+        cdef int i, j, length
+        cdef double x
 
         L = buf.get_left()
 
@@ -37,19 +38,47 @@ cdef class Saw(Generator):
         else:
             length = BUFFER_SIZE
 
-        # Set the first value.
-        L[0] = self.value
-        if L[0] > 1:
-            L[0] -= 2
+        # Fill in most of the values with this partially unrolled loop. (This runs about twice as fast
+        # as the non unrolled version.)
+        x = self.value
+        i = 0
+        while i <= length - 20:
+            x = saw_next(x, self.step); L[i] = x
+            x = saw_next(x, self.step); L[i+1] = x
+            x = saw_next(x, self.step); L[i+2] = x
+            x = saw_next(x, self.step); L[i+3] = x
+            x = saw_next(x, self.step); L[i+4] = x
+            x = saw_next(x, self.step); L[i+5] = x
+            x = saw_next(x, self.step); L[i+6] = x
+            x = saw_next(x, self.step); L[i+7] = x
+            x = saw_next(x, self.step); L[i+8] = x
+            x = saw_next(x, self.step); L[i+9] = x
+            x = saw_next(x, self.step); L[i+10] = x
+            x = saw_next(x, self.step); L[i+11] = x
+            x = saw_next(x, self.step); L[i+12] = x
+            x = saw_next(x, self.step); L[i+13] = x
+            x = saw_next(x, self.step); L[i+14] = x
+            x = saw_next(x, self.step); L[i+15] = x
+            x = saw_next(x, self.step); L[i+16] = x
+            x = saw_next(x, self.step); L[i+17] = x
+            x = saw_next(x, self.step); L[i+18] = x
+            x = saw_next(x, self.step); L[i+19] = x
+            i += 20
 
-        # Fill in the rest of the values.
-        for i in range(1, length):
-            L[i] = L[i-1] + self.step
-            if L[i] > 1:
-                L[i] -= 2
+        # Fill in any remaining values.
+        while i < length:
+            x = saw_next(x, self.step); L[i] = x
+            i += 1
 
-        self.value = L[length-1] + self.step
+        self.value = x
         self.remaining_samples -= length
 
         buf.length = length
         buf.has_more = not self.finite or self.remaining_samples > 0
+
+
+cdef inline double saw_next(double value, double step):
+    value += step
+    if value > 1:
+        value -= 2
+    return value

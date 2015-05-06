@@ -7,8 +7,8 @@ from audio import *
 
 
 def main():
-    measure_stuff()
-    #measure_layer()
+    #measure_stuff()
+    measure_layer()
     #measure_multiply()
     #measure_envelopes()
 
@@ -25,12 +25,12 @@ def measure_stuff():
 
 
 def measure_layer():
-    #measure('Saw(220, 360)')
-    #measure('Saw(220, 360) + Saw(330, 360)')
-    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360)')
-    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
-    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
-    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
+    measure('Saw(220, 360)')
+    measure('Saw(220, 360) + Saw(330, 360)')
+    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360)')
+    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
+    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
+    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
 
     measure('(lambda x: x)(Saw(220, 360))')
     measure('(lambda x: x+x)(Saw(220, 360))')
@@ -58,8 +58,8 @@ def measure_multiply():
 
 
 def measure_envelopes():
-    measure('ExpDecay(10)', 100)
-    #measure('LinearDecay(360)')
+    #measure('ExpDecay(10)', 100)
+    measure('LinearDecay(360)', 50)
 
 
 def test2():
