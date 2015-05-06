@@ -148,6 +148,13 @@ class NewArchTests(unittest.TestCase):
         b = a * a
         b.play()
 
+    def test_compose(self):
+        c = Compose()
+        c.add(Saw(220, .2), 0)
+        c.add(Saw(330, .2), .2)
+        c.play()
+
+
 class ErrorTests(unittest.TestCase):
     def test_operator_errors(self):
         self.assertRaises(TypeError, lambda: Saw(220) + 'a')

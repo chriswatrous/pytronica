@@ -95,6 +95,7 @@ To Do:
     make Generator.measure_render_rate() to complement measure_time()
     Extend class that would make a finite Generator longer or infinite
     get rid of time measurement comments; store those in a spreadsheet instead
+    eliminate all unsafe casting
 
 Doing:
 
@@ -130,3 +131,4 @@ Done:
         make BufferIter class that handles getting next BufferNode
         adapt ExpDecay and LinearDecay to new architecture
         update NoOp and Silence to use BufferIter
+        adapt Compose to new architecture

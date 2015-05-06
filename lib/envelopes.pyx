@@ -25,7 +25,7 @@ cdef class ExpDecay(Generator):
 
         # This is ugly but it runs about twice is fast as the non unrolled version.
 
-        # Fill in most of the values with this unrolled loop. (This runs about twice as fast
+        # Fill in most of the values with this partially unrolled loop. (This runs about twice as fast
         # as the non unrolled version.)
         x = self.value
         i = 0
