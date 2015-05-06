@@ -4,19 +4,20 @@ from libc.math cimport cos, sqrt
 
 from generator cimport Generator
 from buffernode cimport BufferNode
+from bufferiter cimport BufferIter
 
 include "constants.pxi"
 
 # Measured at 91us/s with NoOp as input.
 cdef class Pan(Generator):
-    cdef BufferNode A
+    cdef BufferIter A
     cdef double LC, RC
 
-    def __cinit__(self, Generator inp, double pan):
+    def __cinit__(self, Generator input, double pan):
         if pan < -1 or pan > 1:
             raise ValueError('Pan must be between -1 and 1.')
 
-        self.A = inp.get_starter()
+        self.A = input.get_iter()
 
         # "Circualar" panning law. -3dB in the middle.
         # This one sounds better than triangle.
@@ -41,18 +42,20 @@ cdef class Pan(Generator):
         return True
 
     cdef generate(self, BufferNode buf):
-        self.A = self.A.get_next()
+        cdef BufferNode A_buf
+
+        A_buf = self.A.get_next()
 
         # Get pointers to the buffers.
         L = buf.get_left()
         R = buf.get_right()
-        inputL = self.A.get_left()
-        inputR = self.A.get_right()
+        inputL = A_buf.get_left()
+        inputR = A_buf.get_right()
 
         # Fill the buffers.
-        for i in range(self.A.length):
+        for i in range(A_buf.length):
             L[i] = inputL[i] * self.LC
             R[i] = inputR[i] * self.RC
 
-        buf.length = self.A.length
-        buf.has_more = self.A.has_more
+        buf.length = A_buf.length
+        buf.has_more = A_buf.has_more

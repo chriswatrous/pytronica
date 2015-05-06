@@ -16,5 +16,5 @@ from buffernode import mem_report, mem_report_clear
 from generator import get_sample_rate, set_sample_rate
 from modifiers import Pan
 from combiners import Layer
-from misc import Silence, NoOp
+#from misc import Silence, NoOp
 from osc import Saw

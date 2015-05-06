@@ -1,3 +1,5 @@
+from __future__ import division
+
 from generator cimport Generator
 from buffernode cimport BufferNode
 

@@ -6,6 +6,7 @@ from random import randrange
 from time import time
 
 from buffernode cimport BufferNode
+from bufferiter cimport BufferIter
 from combiners import Layer, mul
 
 include "constants.pxi"
@@ -29,7 +30,9 @@ cdef class Generator:
 
     def __cinit__(self):
         self.sample_rate = _sample_rate
-        self.starter = None
+        self.head = None
+        self.spare = None
+        self.iters = []
 
     def __add__(a, b):
         try:
@@ -52,13 +55,13 @@ cdef class Generator:
     cdef generate(self, BufferNode buf):
         raise NotImplementedError
 
-    def get_starter(self):
-        if self.started:
-            raise IndexError('Cannot use a Generator as an input after it has already been generated.')
-        self.starters += 1
-        if self.starter == None:
-            self.starter = BufferNode(self, channels=0)
-        return self.starter
+    cdef get_iter(self):
+        if any((<BufferIter>x).started for x in self.iters):
+            raise IndexError('Cannot use a Generator as an input after generation has already started.')
+
+        it = BufferIter(self)
+        self.iters.append(it)
+        return it
 
     def play(self):
         cdef double sample
@@ -103,29 +106,32 @@ cdef class Generator:
         fclose(f)
 
     cdef write_output(self, FILE *f):
-        cdef int i
-        cdef double *left
-        cdef double *right
-        cdef bint stereo
+        #cdef int i
+        #cdef double *L
+        #cdef double *R
+        #cdef bint stereo
         cdef BufferNode buf
+        cdef BufferIter it
 
         stereo = self.is_stereo()
+        it = self.get_iter()
 
-        buf = self.get_starter()
+        while True:
+            buf = it.get_next()
 
-        while buf.has_more:
-            buf = buf.get_next()
-
-            left = buf.get_left()
-            right = buf.get_right()
+            L = buf.get_left()
+            R = buf.get_right()
 
             if stereo:
                 for i in range(buf.length):
-                    self.put_sample(left[i], f)
-                    self.put_sample(right[i], f)
+                    self.put_sample(L[i], f)
+                    self.put_sample(R[i], f)
             else:
                 for i in range(buf.length):
-                    self.put_sample(left[i], f)
+                    self.put_sample(L[i], f)
+
+            if not buf.has_more:
+                break
 
     cdef put_sample(self, double sample, FILE *f):
         cdef short output_sample

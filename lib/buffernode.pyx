@@ -12,8 +12,66 @@ from generator cimport Generator
 
 include "constants.pxi"
 
+cdef class BufferNode:
+    """A linked list node that hold sample data and provides a mechanism for getting or generating the
+    next node and recycling nodes that are no longer used."""
 
-# Memory tracking stuff:
+    def __cinit__(self, Generator generator, bint stereo):
+        self.reset()
+
+        self.generator = generator
+        self.stereo = stereo
+
+        if stereo:
+            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
+            self._right = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
+        else:
+            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
+            self._right = self._left
+
+        buf_count_inc(2 if self.stereo else 1)
+
+    def __dealloc__(self):
+        if self._left != NULL:
+            PyMem_Free(self._left)
+        if self._right != NULL and self._right != self._left:
+            PyMem_Free(self._right)
+
+        buf_count_dec(2 if self.stereo else 1)
+
+    cdef reset(self):
+        self.next = None
+        self.has_more = True
+        self.length = 0
+        self.uses = 0
+
+    cdef clear(self):
+        memset(self._left, 0, BUFFER_SIZE * sizeof(double))
+        if self._right != self._left:
+            memset(self._right, 0, BUFFER_SIZE * sizeof(double))
+
+    cdef copyfrom(self, BufferNode buf):
+        if self.stereo != buf.stereo:
+            fmt = "Number of channels doesn't match. self.stereo = {}, buf.stereo = {}"
+            raise TypeError(fmt.format(self.stereo, buf.stereo))
+        memcpy(self._left, buf._left, BUFFER_SIZE * sizeof(double))
+        if self._right != self._left:
+            memcpy(self._right, buf._right, BUFFER_SIZE * sizeof(double))
+
+    # Keep these as functions rather than fields. This encourages saving the pointer as a local variable.
+    # In a tight loop, using the pointer in a local variable is a little faster than getting the pointer
+    # from an object field every iteration of the loop. (confirmed by testing)
+    cdef double *get_left(self):
+        """Get a pointer to the left buffer."""
+        return self._left
+
+    cdef double *get_right(self):
+        """Get a pointer to the right buffer."""
+        return self._right
+
+
+# Memory tracking stuff --------------------------------------------
+
 cdef int _num_buffers
 cdef int _max_buffers
 cdef int _allocated_buffers
@@ -44,119 +102,3 @@ def mem_report_clear():
     _max_buffers = 0
     _allocated_buffers = 0
     _freed_buffers = 0
-
-
-cdef class BufferNode:
-    """A linked list node that hold sample data and provides a mechanism for getting or generating the
-    next node and recycling nodes that are no longer used."""
-
-    def __cinit__(self, Generator generator, int channels):
-        self.reset()
-
-        self.generator = generator
-        self.channels = channels
-
-        if channels == 0:
-            self._left = NULL
-            self._right = NULL
-        elif channels == 1:
-            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
-            self._right = self._left
-        elif channels == 2:
-            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
-            self._right = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
-        else:
-            raise ValueError('channels must be 0, 1, or 2 (got {})'.format(channels))
-
-        buf_count_inc(self.channels)
-
-    def __dealloc__(self):
-        self.next = None
-        self.generator = None
-
-        if self._left != NULL:
-            PyMem_Free(self._left)
-        if self._right != NULL and self._right != self._left:
-            PyMem_Free(self._right)
-
-        buf_count_dec(self.channels)
-
-    cdef reset(self):
-        self.next = None
-        self.has_more = True
-        self.length = 0
-        self._uses = 0
-
-    cdef clear(self):
-        if self._left == NULL or self._right == NULL:
-            raise IndexError('This BufferNode was created with 0 channels.')
-        memset(self._left, 0, BUFFER_SIZE * sizeof(double))
-        if self._right != self._left:
-            memset(self._right, 0, BUFFER_SIZE * sizeof(double))
-
-    cdef copyfrom(self, BufferNode buf):
-        if buf.channels != self.channels:
-            fmt = "Number of channels doesn't match. (self: {}  buf: {})"
-            raise TypeError(fmt.format(self.channels, buf.channels))
-        memcpy(self._left, buf._left, BUFFER_SIZE * sizeof(double))
-        if self._right != self._left:
-            memcpy(self._right, buf._right, BUFFER_SIZE * sizeof(double))
-
-    # Keep these as functions rather than fields. This encourages saving the pointer as a local variable.
-    # In a tight loop, using the pointer in a local variable is a little faster than getting the pointer
-    # from an object field every iteration of the loop. (confirmed by testing)
-    cdef double *get_left(self) except NULL:
-        """Get a pointer to the left buffer."""
-        if self._left == NULL:
-            raise IndexError('This BufferNode was created with 0 channels.')
-        return self._left
-
-    cdef double *get_right(self) except NULL:
-        """Get a pointer to the right buffer."""
-        if self._right == NULL:
-            raise IndexError('This BufferNode was created with 0 channels.')
-        return self._right
-
-    cdef BufferNode get_next(self):
-        """Get the next node in the list. Generate it if it doesn't already exist. Recycle an old node if
-        possible, otherwise allocate a new node."""
-        cdef int channels
-
-        if not self.has_more:
-            raise IndexError('There are no more nodes to be generated.')
-
-        self.generator.started = True
-
-        # Generate the next node if it doesn't already exist.
-        if not self.next:
-            channels = self.channels if self.channels != 0 else (2 if self.generator.is_stereo() else 1)
-
-            # Recycle this node now?
-            if self.generator.starters == 1 and self.channels > 0:
-                self.generator.generate(self)
-                return self
-
-            # Recycle the spare node?
-            if self.generator.spare:
-                # Recycle.
-                self.next = self.generator.spare
-                self.generator.spare = None
-            else:
-                # Create new node.
-                self.next = BufferNode(self.generator, channels)
-
-            self.generator.generate(self.next)
-
-        self._uses += 1
-
-        next = self.next
-
-        # If this node will not be used again.
-        if self._uses == self.generator.starters:
-            if self.channels == 0:
-                self.generator.starter = None
-            else:
-                self.generator.spare = self
-                self.reset()
-
-        return next
