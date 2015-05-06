@@ -137,6 +137,12 @@ class NewArchTests(unittest.TestCase):
         a = Saw(f1, 20) * Saw(f2, .2)
         a.play()
 
+    def test_decays(self):
+        a = Saw(220) * ExpDecay(.1)
+        a.play()
+        a = Saw(220) * LinearDecay(.5)
+        a.play()
+
 
 class ErrorTests(unittest.TestCase):
     def test_operator_errors(self):

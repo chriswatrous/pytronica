@@ -92,9 +92,10 @@ To Do:
             make sure the inputs are deleted when they are done being used, so that the memory can be freed by gc
     make SampleBuffer class that just handles allocating and freeing the buffer memory
     try without node recycling and see if it really makes a difference 
+    make Generator.measure_render_rate() to complement measure_time()
+    Extend class that would make a finite Generator longer or infinite
 
 Doing:
-    make BufferIter class that handles getting next BufferNode
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -125,3 +126,5 @@ Done:
         move NoOp and Silence to a new file
         adapt Layer to the new architecture
         adapt Multiply to new architecture
+        make BufferIter class that handles getting next BufferNode
+        adapt ExpDecay and LinearDecay to new architecture

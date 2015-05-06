@@ -34,7 +34,7 @@ cdef class BufferIter:
             # Reuse the current node.
             assert self.current.next == None
             self.generator.generate(self.current)
-            return self.curent
+            return self.current
 
         self.current.uses += 1
 
