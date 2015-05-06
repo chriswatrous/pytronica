@@ -7,8 +7,8 @@ from audio import *
 
 
 def main():
-    measure_stuff()
-    #measure_layer()
+    #measure_stuff()
+    measure_layer()
 
 
 # Tests ------------------------------------------------------

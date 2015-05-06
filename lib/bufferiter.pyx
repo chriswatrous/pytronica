@@ -41,11 +41,12 @@ cdef class BufferIter:
         # Next already exists?
         if self.current.next:
             # Should the current node be recycled?
+            next = self.current.next
             if self.current.uses == len(self.generator.iters):
                 self.current.reset()
                 self.generator.spare = self.current
                 self.generator.head = None
-            self.current = self.current.next
+            self.current = next
             return self.current
 
         # Generate next node.

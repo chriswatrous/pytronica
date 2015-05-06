@@ -143,6 +143,10 @@ class NewArchTests(unittest.TestCase):
         a = Saw(220) * LinearDecay(.5)
         a.play()
 
+    def test_use_simul(self):
+        a = Saw(220, 1)
+        b = a * a
+        b.play()
 
 class ErrorTests(unittest.TestCase):
     def test_operator_errors(self):

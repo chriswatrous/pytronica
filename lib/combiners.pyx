@@ -121,7 +121,7 @@ cdef class ConstMultiply(Generator):
 
     cdef generate(self, BufferNode buf):
         cdef BufferNode A_buf
-        
+
         A_buf = self.A.get_next()
 
         # Get pointers.

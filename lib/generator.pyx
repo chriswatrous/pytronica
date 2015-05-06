@@ -106,10 +106,6 @@ cdef class Generator:
         fclose(f)
 
     cdef write_output(self, FILE *f):
-        #cdef int i
-        #cdef double *L
-        #cdef double *R
-        #cdef bint stereo
         cdef BufferNode buf
         cdef BufferIter it
 
@@ -163,11 +159,14 @@ cdef class Generator:
             print 'Clipping! (max value = {})'.format(self._clip_max)
 
     def measure_time(self):
+        cdef BufferIter it
         cdef BufferNode buf
         t = time()
-        buf = self.get_starter()
 
-        while buf.has_more:
-            buf = buf.get_next()
+        it = self.get_iter()
+        while True:
+            buf = it.get_next()
+            if not buf.has_more:
+                break
 
         return time() - t

@@ -3,10 +3,10 @@ from libc.string cimport memset
 
 from generator cimport Generator
 from buffernode cimport BufferNode
+from c_util cimport imin
 
 include "constants.pxi"
 
-# Measured at 24us/s.
 cdef class Silence(Generator):
     cdef long samples_left
 
@@ -19,17 +19,12 @@ cdef class Silence(Generator):
     cdef generate(self, BufferNode buf):
         buf.clear()
 
-        if self.samples_left <= BUFFER_SIZE:
-            buf.has_more = False
-            buf.length = self.samples_left
-        else:
-            buf.has_more = True
-            buf.length = BUFFER_SIZE
+        buf.has_more = self.samples_left > BUFFER_SIZE
+        buf.length = imin(self.samples_left, BUFFER_SIZE)
 
         self.samples_left -= BUFFER_SIZE
 
 
-# Measured at 920ns/s real time.
 cdef class NoOp(Generator):
     cdef long samples_left
 
@@ -40,11 +35,7 @@ cdef class NoOp(Generator):
         return False
 
     cdef generate(self, BufferNode buf):
-        if self.samples_left <= BUFFER_SIZE:
-            buf.has_more = False
-            buf.length = self.samples_left
-        else:
-            buf.has_more = True
-            buf.length = BUFFER_SIZE
+        buf.has_more = self.samples_left > BUFFER_SIZE
+        buf.length = imin(self.samples_left, BUFFER_SIZE)
 
         self.samples_left -= BUFFER_SIZE

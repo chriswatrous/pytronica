@@ -94,8 +94,10 @@ To Do:
     try without node recycling and see if it really makes a difference 
     make Generator.measure_render_rate() to complement measure_time()
     Extend class that would make a finite Generator longer or infinite
+    get rid of time measurement comments; store those in a spreadsheet instead
 
 Doing:
+    update NoOp and Silence to use BufferIter
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
