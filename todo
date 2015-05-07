@@ -99,7 +99,6 @@ To Do:
     every Generator that takes inputs needs to do something intelligent with mlength (mostly keep it the same)
 
 Doing:
-    adapt Controller to new architecture
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -135,4 +134,5 @@ Done:
         update NoOp and Silence to use BufferIter
         adapt Compose to new architecture
         adapt Chain to new architecture
+        adapt Controller to new architecture
     eliminate all unsafe casting

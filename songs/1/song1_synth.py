@@ -39,5 +39,6 @@ def arp1s(ss, *args, **kwargs):
 
 if __name__ == '__main__':
     #synth1(note('C4'), 0).play()
-    arp1s(['E3 B3 D4 G4', 'D3 A3 C4 F4', 'G2 D3 F3 Bb3', 'A2 E3 G3 C4']).play()
-    #print arp1s(['E3 B3 D4 G4', 'D3 A3 C4 F4', 'G2 D3 F3 Bb3', 'A2 E3 G3 C4']).mlength
+    a = arp1s(['E3 B3 D4 G4', 'D3 A3 C4 F4', 'G2 D3 F3 Bb3', 'A2 E3 G3 C4'])
+    #a.play()
+    repeat(a, 1000).play()
