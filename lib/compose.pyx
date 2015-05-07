@@ -29,10 +29,14 @@ cdef class Compose(Generator):
     def __init__(self, inputs=None):
         self._starting = True
         self._frame_count = 0
-        self._inputs = inputs or []
+        self._inputs = []
+
+        if inputs:
+            for x in inputs:
+                self.add(x)
 
     def add(self, Generator generator, delay):
-        self._inputs.append((generator, delay))
+        self._inputs.append((generator.get_iter(), delay))
 
     cdef bint is_stereo(self) except -1:
         cdef Generator input
@@ -40,8 +44,8 @@ cdef class Compose(Generator):
         if not self._inputs:
             raise IndexError('Compose object has no inputs')
 
-        for input, delay in self._inputs:
-            if input.is_stereo():
+        for iter, delay in self._inputs:
+            if (<BufferIter?>iter).generator.is_stereo():
                 return True
 
         return False
@@ -55,10 +59,10 @@ cdef class Compose(Generator):
         self._waiting = deque()
         self._running = []
 
-        for input, delay in self._inputs:
+        for iter, delay in self._inputs:
             start_frame = <int>((delay * self.sample_rate) / BUFFER_SIZE)
             offset = <int>((delay * self.sample_rate) - (start_frame * BUFFER_SIZE))
-            self._waiting.append(ComposeInfo((<Generator?>input).get_iter(), start_frame, offset))
+            self._waiting.append(ComposeInfo(iter, start_frame, offset))
 
     cdef generate(self, BufferNode buf):
         cdef ComposeInfo info
@@ -137,15 +141,12 @@ cdef class Compose(Generator):
 
 
 cdef class Chain(Compose):
-    cdef double _current_time
-
     def __init__(self, inputs=None):
         Compose.__init__(self)
-        self._current_time = 0
         if inputs:
             for x in inputs:
                 self.add(x)
 
-    def add(self, Generator input):
-        Compose.add(self, input, self._current_time)
-        self._current_time += input.mlength
+    def add(self, Generator input, offset=None):
+        Compose.add(self, input, self.mlength)
+        self.mlength += input.mlength if offset == None else offset

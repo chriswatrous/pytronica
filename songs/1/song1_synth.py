@@ -2,6 +2,10 @@
 from __future__ import division
 from random import random
 
+if __name__ == '__main__':
+    import sys
+    sys.path.append('../../lib')
+
 from audio import *
 
 pitch_spread = 0.1

@@ -34,6 +34,7 @@ cdef class Generator:
         self.spare = None
         self.iters = []
         self._head_uses = 0
+        self.mlength = 0
 
     def __add__(a, b):
         try:
@@ -51,7 +52,6 @@ cdef class Generator:
             return NotImplemented
 
     cdef BufferNode get_head(self):
-    #cdef get_head(self):
         if self._head_uses >= len(self.iters):
             raise IndexError('get_head called too many times')
 
@@ -70,7 +70,6 @@ cdef class Generator:
         return buf
 
     cdef BufferNode get_next(self):
-    #cdef get_next(self):
         buf = BufferNode(self, self._stereo)
         self.generate(buf)
         return buf

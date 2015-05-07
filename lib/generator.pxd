@@ -21,5 +21,3 @@ cdef class Generator:
     cdef report_clipping(self, double sample)
     cdef BufferNode get_head(self)
     cdef BufferNode get_next(self)
-    #cdef get_head(self)
-    #cdef get_next(self)

@@ -2,13 +2,15 @@ from __future__ import division
 
 from collections import deque
 
-from sig cimport Signal, BufferSignal
-from sig import get_sample_rate
+from generator cimport Generator
+from buffernode cimport BufferNode
 from c_util cimport imin, imax
+
+from generator import get_sample_rate
 
 include "constants.pxi"
 
-cdef class Controller(BufferSignal):
+cdef class Controller(Generator):
     cdef double start_value
     cdef ControlMoveQueue moves
     cdef BufferFiller current_move
@@ -22,13 +24,16 @@ cdef class Controller(BufferSignal):
         self.starting = True
         self.ending = False
 
-
     def lineto(self, time, value):
         self.moves.lineto(time, value)
 
+    cdef bint is_stereo(self) except -1:
+        return False
 
-    cdef int generate(self) except -1:
+    cdef generate(self, BufferNode buf):
         cdef int i
+
+        L = buf.get_left()
 
         if self.starting:
             self.starting = False
@@ -38,16 +43,13 @@ cdef class Controller(BufferSignal):
             else:
                 raise IndexError('There are no control moves in the queue.')
 
-        if self.ending:
-            return 0
-
         i = 0
         while self.next_change - self.current_sample <= BUFFER_SIZE - i:
             # Current move ending this frame.
 
             # Fill buffer.
             length = self.next_change - self.current_sample
-            self.current_move.fill_buffer(&self.left[i], length)
+            self.current_move.fill_buffer(&L[i], length)
 
             # Increment counters.
             i += length
@@ -58,16 +60,18 @@ cdef class Controller(BufferSignal):
                 self.current_move = self.moves.get_next(self.current_move.value)
                 self.next_change = self.current_sample + self.current_move.length
             else:
-                self.ending = True
-                return i
+                buf.length = i
+                buf.has_more = False
+                return
 
         # Current move ending sometime after this frame.
         # Fill buffer and increment counter.
         length = BUFFER_SIZE - i
-        self.current_move.fill_buffer(&self.left[i], length)
+        self.current_move.fill_buffer(&L[i], length)
         self.current_sample += length
 
-        return BUFFER_SIZE
+        buf.length = BUFFER_SIZE
+        buf.has_more = True
 
 
 cdef class ControlMoveQueue:

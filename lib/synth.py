@@ -4,7 +4,7 @@ from collections import deque
 
 from osc import Saw
 from util import f_range, p2f
-from compose import Compose
+from compose import Compose, Chain
 
 def pSaw(p, *args, **kwargs):
     return Saw(p2f(p), *args, **kwargs)
@@ -26,3 +26,16 @@ def first_to_center(xs):
             d.append(x)
         left = not left
     return list(d)
+
+def repeat(sound, times, interval=None):
+    if interval == None:
+        ch = Chain()
+        for _ in range(times):
+            ch.add(sound)
+        return ch
+    else:
+        c = Compose()
+        delay = 0
+        for _ in range(times):
+            c.add(sound, delay)
+            delay += interval
