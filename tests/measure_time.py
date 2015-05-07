@@ -9,10 +9,10 @@ from audio import *
 
 
 def main():
-    #measure_stuff()
+    measure_stuff()
     #measure_layer()
     #measure_multiply()
-    measure_envelopes()
+    #measure_envelopes()
 
 
 # Tests ------------------------------------------------------

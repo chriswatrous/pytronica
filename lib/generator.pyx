@@ -147,7 +147,7 @@ cdef class Generator:
                 player_proc.terminate()
             call(['rm', fifo_name])
 
-    def rawwrite(self, filename):
+    def raw_write(self, filename):
         cdef FILE *f
 
         f = fopen(filename, 'w')
@@ -209,19 +209,14 @@ cdef class Generator:
 
     # Stuff for measuring the execution time of Generators ----------------------------------------
     def measure_time(self):
-        cdef BufferIter it
-        cdef BufferNode buf
-        t = time()
-
-        it = self.get_iter()
-        while True:
-            buf = it.get_next()
-            if not buf.has_more:
-                break
-
-        return time() - t
+        """Measures and returns the total execution time of a generator."""
+        return self._measure(False)
 
     def measure_rate(self):
+        """Measures and returns the execution time as a fraction of real time."""
+        return self._measure(True)
+
+    cdef _measure(self, bint rate):
         cdef BufferIter it
         cdef BufferNode buf
         cdef long samples
@@ -236,4 +231,9 @@ cdef class Generator:
             if not buf.has_more:
                 break
 
-        return (time() - t) / (samples / self.sample_rate)
+        t = time() - t
+
+        if rate:
+            return t / (samples / self.sample_rate)
+        else:
+            return t

@@ -99,7 +99,7 @@ To Do:
     replace issubclass with isinstance
 
 Doing:
-    operator divide for dividing by constants
+    Generator.wav_write()
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -138,3 +138,5 @@ Done:
         adapt Controller to new architecture
         operator subtract for new architecture
     eliminate all unsafe casting
+    operator divide for dividing by constants
+    rename Generator.rawwrite() -> raw_write()
