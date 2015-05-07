@@ -25,12 +25,12 @@ def measure_stuff():
 
 
 def measure_layer():
-    measure('Saw(220, 360)')
-    measure('Saw(220, 360) + Saw(330, 360)')
-    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360)')
-    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
-    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
-    measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
+    #measure('Saw(220, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
+    #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
 
     measure('(lambda x: x)(Saw(220, 360))')
     measure('(lambda x: x+x)(Saw(220, 360))')

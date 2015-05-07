@@ -33,6 +33,7 @@ cdef class Generator:
         self.head = None
         self.spare = None
         self.iters = []
+        self._head_uses = 0
 
     def __add__(a, b):
         try:
@@ -49,6 +50,22 @@ cdef class Generator:
         except TypeError:
             return NotImplemented
 
+    cdef get_head(self):
+        if self._head_uses >= len(self.iters):
+            raise IndexError('get_head called too many times')
+
+        if not self.head:
+            self.head = BufferNode(self, self.is_stereo())
+
+        buf = self.head
+        
+        # Detach head so the list can be garbage collected.
+        self._head_uses += 1
+        if self._head_uses == len(self.iters):
+            self.head = None
+
+        return buf
+
     cdef bint is_stereo(self) except -1:
         raise NotImplementedError
 
@@ -56,7 +73,7 @@ cdef class Generator:
         raise NotImplementedError
 
     cdef get_iter(self):
-        if any((<BufferIter>x).started for x in self.iters):
+        if any((<BufferIter?>x).started for x in self.iters):
             raise IndexError('Cannot use a Generator as an input after generation has already started.')
 
         it = BufferIter(self)

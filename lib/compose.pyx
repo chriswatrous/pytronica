@@ -22,29 +22,25 @@ cdef class ComposeInfo:
 
 
 cdef class Compose(Generator):
-    cdef object inputs, waiting, running
-    cdef int frame_count
-    cdef bint started
+    cdef object _inputs, _waiting, _running
+    cdef int _frame_count
+    cdef bint _starting
 
-    def __init__(self, inputs=None):
-        if inputs:
-            self.inputs = inputs
-        else:
-            self.inputs = []
-
-        self.started = False
-        self.frame_count = 0
+    def __cinit__(self, inputs=None):
+        self._inputs = inputs or []
+        self._starting = True
+        self._frame_count = 0
 
     def add(self, Generator generator, delay):
-        self.inputs.append((generator, delay))
+        self._inputs.append((generator, delay))
 
     cdef bint is_stereo(self) except -1:
         cdef Generator input
 
-        if not self.inputs:
+        if not self._inputs:
             raise IndexError('Compose object has no inputs')
 
-        for input, delay in self.inputs:
+        for input, delay in self._inputs:
             if input.is_stereo():
                 return True
 
@@ -52,27 +48,25 @@ cdef class Compose(Generator):
 
     cdef _prepare(self):
         cdef int start_frame, offset
-        cdef Generator input
         cdef double delay
 
-        self.inputs.sort(key=lambda x: x[1])
+        self._inputs.sort(key=lambda x: x[1])
 
-        self.waiting = deque()
-        self.running = []
+        self._waiting = deque()
+        self._running = []
 
-        for input, delay in self.inputs:
+        for input, delay in self._inputs:
             start_frame = <int>((delay * self.sample_rate) / BUFFER_SIZE)
             offset = <int>((delay * self.sample_rate) - (start_frame * BUFFER_SIZE))
-            self.waiting.append(ComposeInfo(input.get_iter(), start_frame, offset))
-
+            self._waiting.append(ComposeInfo((<Generator?>input).get_iter(), start_frame, offset))
 
     cdef generate(self, BufferNode buf):
         cdef ComposeInfo info
         cdef BufferNode I_buf
         cdef int i, length, frame_length
 
-        if not self.started:
-            self.started = True
+        if self._starting:
+            self._starting = False
             self._prepare()
 
         buf.clear()
@@ -82,16 +76,16 @@ cdef class Compose(Generator):
 
         # Get the signals that will be starting this frame.
         while True:
-            if len(self.waiting) == 0:
+            if len(self._waiting) == 0:
                 break
-            info = self.waiting[0]
-            if info.start_frame > self.frame_count:
+            info = self._waiting[0]
+            if info.start_frame > self._frame_count:
                 break
-            self.running.append(self.waiting.popleft())
+            self._running.append(self._waiting.popleft())
 
         frame_length = 0
         done = []
-        for info in self.running:
+        for info in self._running:
             # Add the end of the previously generated signal to the start of the buffer.
             if info.iter.current:
                 I_buf = info.iter.current
@@ -134,9 +128,9 @@ cdef class Compose(Generator):
             frame_length = imax(length, frame_length)
 
         for x in done:
-            self.running.remove(x)
+            self._running.remove(x)
 
-        self.frame_count += 1
+        self._frame_count += 1
 
-        buf.has_more = self.running or self.waiting
+        buf.has_more = self._running or self._waiting
         buf.length = BUFFER_SIZE if buf.has_more else frame_length

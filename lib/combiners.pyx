@@ -26,7 +26,7 @@ cdef class Layer(Generator):
     def add(self, input):
         if issubclass(type(input), Generator):
             self.inputs.append(input)
-            self.input_iters.append((<Generator>input).get_iter())
+            self.input_iters.append((<Generator?>input).get_iter())
         else:
             self.C += input
 
@@ -37,7 +37,7 @@ cdef class Layer(Generator):
         # We need to have the input Generators saved in self.inputs in order to preserve them
         # as self.input_iters is emptied out by generate()
         for x in self.inputs:
-            if (<Generator>x).is_stereo():
+            if (<Generator?>x).is_stereo():
                 return True
 
         return False
@@ -182,7 +182,7 @@ cdef class Multiply(Generator):
         buf.length = length
         buf.has_more = A_buf.has_more and B_buf.has_more
 
-
+#
 #cdef class Chain(Signal):
     #cdef Signal comp
 #
@@ -206,3 +206,4 @@ cdef class Multiply(Generator):
 #
     #cdef int generate(self) except -1:
         #return self.comp.generate()
+#
