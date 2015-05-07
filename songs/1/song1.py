@@ -22,7 +22,7 @@ part1 = f(['G3 C4 E4 B4', 'A3 D4 F#4 C5'])
 part1a = f(['E3 A3 C4 G4', 'F#3 B3 D4 A4'])
 
 def osc(p):
-    return Pan(pSaw(p + pitch_spread), -.5) + Pan(pSaw(p - pitch_spread), .5)
+    return pSaw(p + pitch_spread).pan(-.5) + pSaw(p - pitch_spread).pan(.5)
 
 def synth(p, d):
     return (osc(p) + osc(p+7)) * ExpDecay(d)
@@ -34,7 +34,7 @@ def f(d):
     return a
 
 a = f(.75)
-b = f(.3)
+b = f(.5)
 
 c = Chain()
 for x in [3, 4, 3, 4]:

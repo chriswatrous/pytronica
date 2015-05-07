@@ -40,8 +40,8 @@ class Tests(unittest.TestCase):
 class NewArchTests(unittest.TestCase):
     def test_saw_pan(self):
         s = Saw(220, .2)
-        p1 = Pan(s, .5)
-        p2 = Pan(s, -.5)
+        p1 = s.pan(.5)
+        p2 = s.pan(-.5)
         p1.play()
         p2.play()
 
@@ -109,6 +109,10 @@ class NewArchTests(unittest.TestCase):
         c.add(2 - Saw(220, .2), .5)
         c.add(Saw(220, .2) - 2, .5)
         (.5 * c).play()
+
+    def test_div(self):
+        a = Saw(220, .2) / 4
+        a.play()
 
 
 class ErrorTests(unittest.TestCase):

@@ -8,6 +8,7 @@ from time import time
 from buffernode cimport BufferNode
 from bufferiter cimport BufferIter
 from combiners import Layer, mul
+from modifiers import Pan
 
 include "constants.pxi"
 
@@ -36,6 +37,7 @@ cdef class Generator:
         self._head_uses = 0
         self.mlength = 0
 
+    # Operators -----------------------------------------------------------------------------------
     def __add__(a, b):
         try:
             l = Layer()
@@ -57,6 +59,22 @@ cdef class Generator:
         except TypeError:
             return NotImplemented
 
+    def __div__(a, b):
+        if isinstance(b, Generator):
+            return NotImplemented
+        try:
+            return a * (1/b)
+        except TypeError:
+            return NotImplemented
+
+    def __truediv__(a, b):
+        return Generator.__div__(a, b)
+
+    # Convenience methods -------------------------------------------------------------------------
+    def pan(self, p):
+        return Pan(self, p)
+
+    # ---------------------------------------------------------------------------------------------
     cdef BufferNode get_head(self):
         if self._head_uses >= len(self.iters):
             raise IndexError('get_head called too many times')
@@ -189,6 +207,7 @@ cdef class Generator:
             self._clip_max = sample
             print 'Clipping! (max value = {})'.format(self._clip_max)
 
+    # Stuff for measuring the execution time of Generators ----------------------------------------
     def measure_time(self):
         cdef BufferIter it
         cdef BufferNode buf
