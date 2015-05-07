@@ -6,7 +6,7 @@ from osc import Saw
 from util import f_range, p2f
 from compose import Compose, Chain
 
-def pSaw(p, *args, **kwargs):
+def psaw(p, *args, **kwargs):
     return Saw(p2f(p), *args, **kwargs)
 
 def stereo_spread(signals, spread, center_first = False):

@@ -8,17 +8,14 @@ if __name__ == '__main__':
 
 from audio import *
 
-pitch_spread = 0.1
-def synth1(p, pn, random_phase=False):
-    if random_phase:
-        osc = pSaw(p, phase=random())
-        osc += pSaw(p + pitch_spread, phase=random())
-        osc += pSaw(p - pitch_spread, phase=random())
-    else:
-        osc = pSaw(p)
-        osc += pSaw(p + pitch_spread)
-        osc += pSaw(p - pitch_spread)
-    return (1/3 * osc * ExpDecay(0.3)).pan(pn)
+pitch_spread = 0.2
+def synth1(p, pn, random_phase=0):
+    osc = Layer()
+    n = 10
+    d = 4
+    for x in f_range(-pitch_spread, pitch_spread, n):
+        osc.add(psaw(p + x, phase=random_phase*random()))
+    return (osc * ExpDecay(0.3) / d).pan(pn)
 
 
 step = 0.18
@@ -29,7 +26,7 @@ def arp1(s, pan_spread=1):
     c = Compose()
     delay = 0
     for x in [0,1,2,1,3,2,1]:
-        c.add(synth1(ns[x], pans[x]), delay)
+        c.add(synth1(ns[x], pans[x], 1), delay)
         delay += step
     c.mlength = step * 7
     return c
@@ -42,4 +39,5 @@ if __name__ == '__main__':
     a = arp1s(['E3 B3 D4 G4', 'D3 A3 C4 F4', 'G2 D3 F3 Bb3', 'A2 E3 G3 C4'])
     #a = arp1s(['Eb3 G3 Bb3 F4', 'F3 A3 C4 G4'])
     #a.play()
-    repeat(a, 1000).play()
+    (repeat(a, 1000)/2).play()
+    #(repeat(a, 4)/2).audacity()

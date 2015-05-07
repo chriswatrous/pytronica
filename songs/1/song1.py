@@ -22,7 +22,7 @@ part1 = f(['G3 C4 E4 B4', 'A3 D4 F#4 C5'])
 part1a = f(['E3 A3 C4 G4', 'F#3 B3 D4 A4'])
 
 def osc(p):
-    return pSaw(p + pitch_spread).pan(-.5) + pSaw(p - pitch_spread).pan(.5)
+    return psaw(p + pitch_spread).pan(-.5) + psaw(p - pitch_spread).pan(.5)
 
 def synth(p, d):
     return (osc(p) + osc(p+7)) * ExpDecay(d)
@@ -47,8 +47,8 @@ part2 = 0.25 * Chain([a, c])
 def part3():
     pitch_spread = 0.1
     def synth(p):
-        return pSaw(p) *  ExpDecay(0.05)
-        #return pSaw(p) *  LinearDecay(.8*step)
+        return psaw(p) *  ExpDecay(0.05)
+        #return psaw(p) *  LinearDecay(.8*step)
 
     arp_idx_steps = [-1, -1, 1, 1, 1, 1]
     def arp_idxs():

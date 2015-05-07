@@ -112,8 +112,9 @@ class NewArchTests(unittest.TestCase):
 
     def test_div(self):
         a = Saw(220, .2) / 4
-        a.play()
-
+        #a.play()
+        #a.wav_write('out.wav')
+        a.audacity()
 
 class ErrorTests(unittest.TestCase):
     def test_operator_errors(self):

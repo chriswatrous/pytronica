@@ -151,8 +151,29 @@ cdef class Generator:
         cdef FILE *f
 
         f = fopen(filename, 'w')
-        self.write_output(f)
+        stereo = self.write_output(f)
         fclose(f)
+        return stereo
+
+    def wav_write(self, filename):
+        temp_file = '/tmp/{}.raw'.format(randrange(1e9))
+        stereo = self.raw_write(temp_file)
+        channels = 2 if stereo else 1
+        call(['sox',
+              '-r', str(self.sample_rate),
+              '-e', 'signed',
+              '-b', '16',
+              '-c', str(channels),
+              '-t', 'raw',
+              temp_file,
+              filename])
+        call(['rm', temp_file])
+
+    def audacity(self):
+        temp_file = '/tmp/{}.wav'.format(randrange(1e9))
+        self.wav_write(temp_file)
+        with open('/dev/null') as f:
+            call(['audacity', temp_file], stderr=f)
 
     cdef write_output(self, FILE *f):
         cdef BufferNode buf
@@ -177,6 +198,8 @@ cdef class Generator:
 
             if not buf.has_more:
                 break
+
+        return stereo
 
     cdef put_sample(self, double sample, FILE *f):
         cdef short output_sample
