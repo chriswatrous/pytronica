@@ -26,10 +26,10 @@ cdef class Compose(Generator):
     cdef int _frame_count
     cdef bint _starting
 
-    def __cinit__(self, inputs=None):
-        self._inputs = inputs or []
+    def __init__(self, inputs=None):
         self._starting = True
         self._frame_count = 0
+        self._inputs = inputs or []
 
     def add(self, Generator generator, delay):
         self._inputs.append((generator, delay))
@@ -134,3 +134,18 @@ cdef class Compose(Generator):
 
         buf.has_more = self._running or self._waiting
         buf.length = BUFFER_SIZE if buf.has_more else frame_length
+
+
+cdef class Chain(Compose):
+    cdef double _current_time
+
+    def __init__(self, inputs=None):
+        Compose.__init__(self)
+        self._current_time = 0
+        if inputs:
+            for x in inputs:
+                self.add(x)
+
+    def add(self, Generator input):
+        Compose.add(self, input, self._current_time)
+        self._current_time += input.mlength

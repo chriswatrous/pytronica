@@ -22,11 +22,9 @@ cdef class BufferIter:
             if self.current.next:
                 self.current = self.current.next
             else:
-                self.current.next = BufferNode(self.generator, self.current.stereo)
+                self.current.next = self.generator.get_next()
                 self.current = self.current.next
-                self.generator.generate(self.current)
         else:
             self.current = self.generator.get_head()
-            self.generator.generate(self.current)
 
         return self.current

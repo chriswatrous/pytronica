@@ -3,6 +3,8 @@ from __future__ import division
 import unittest
 import time
 
+import sys
+sys.path.append('../lib')
 from audio import *
 
 class Tests(unittest.TestCase):
@@ -154,14 +156,14 @@ class NewArchTests(unittest.TestCase):
         c.add(Saw(330, .2), .2)
         c.play()
 
-    #def test_chain(self):
-        #f1, f2 = note_freqs('C4 F#3')
-        #a = Saw(f1, .2)
-        #a.mlength = .2
-        #b = Saw(f2, .2)
-        #b.mlength = .2
-        #ch = Chain([a, b])
-        #ch.play()
+    def test_chain(self):
+        f1, f2 = note_freqs('C4 F#3')
+        a = Saw(f1, .2)
+        a.mlength = .2
+        b = Saw(f2, .2)
+        b.mlength = .2
+        ch = Chain([a, b])
+        ch.play()
 
 
 class ErrorTests(unittest.TestCase):

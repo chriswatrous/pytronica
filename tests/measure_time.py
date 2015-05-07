@@ -3,24 +3,26 @@
 from __future__ import division
 from time import time
 
+import sys
+sys.path.append('../lib')
 from audio import *
 
 
 def main():
     #measure_stuff()
-    measure_layer()
+    #measure_layer()
     #measure_multiply()
-    #measure_envelopes()
+    measure_envelopes()
 
 
 # Tests ------------------------------------------------------
 
 def measure_stuff():
-    #measure('NoOp(360)')
-    #measure('Silence(36)')
-    measure('Saw(220, 360)', 50)
-    #measure('Pan(NoOp(360), -.5)')
-    #measure('Pan(Saw(220, 360), -.5)')
+    measure('NoOp(360)')
+    measure('Silence(36)')
+    measure('Saw(220, 360)')
+    measure('Pan(NoOp(360), -.5)')
+    measure('Pan(Saw(220, 360), -.5)')
     mem_report()
 
 

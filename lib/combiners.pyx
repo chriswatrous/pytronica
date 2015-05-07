@@ -181,29 +181,3 @@ cdef class Multiply(Generator):
 
         buf.length = length
         buf.has_more = A_buf.has_more and B_buf.has_more
-
-#
-#cdef class Chain(Signal):
-    #cdef Signal comp
-#
-    #def __init__(self, inputs=None):
-        #self.comp = Compose()
-        #self.mlength = 0
-#
-        #if inputs:
-            #for input in inputs:
-                #self.add(input)
-#
-    #def add(self, Signal input):
-        #if input.mlength == None:
-            #raise ValueError('mlength not set')
-        #self.comp.add(input, self.mlength)
-        #self.mlength += input.mlength
-#
-        ## The Compose might switch from mono to stereo after adding a stereo Signal.
-        #self.left = self.comp.left
-        #self.right = self.comp.right
-#
-    #cdef int generate(self) except -1:
-        #return self.comp.generate()
-#

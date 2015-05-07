@@ -2,14 +2,16 @@ from libc.stdio cimport FILE
 from buffernode cimport BufferNode
 
 cdef class Generator:
+    cdef public double mlength
+
     cdef double sample_rate
     cdef BufferNode head
     cdef BufferNode spare
     cdef object iters
-    cdef double mlength
 
     cdef double _clip_max
     cdef int _head_uses
+    cdef bint _stereo
 
     cdef bint is_stereo(self) except -1
     cdef generate(self, BufferNode buf)
@@ -17,4 +19,7 @@ cdef class Generator:
     cdef write_output(self, FILE *f)
     cdef put_sample(self, double sample, FILE *f)
     cdef report_clipping(self, double sample)
-    cdef get_head(self)
+    cdef BufferNode get_head(self)
+    cdef BufferNode get_next(self)
+    #cdef get_head(self)
+    #cdef get_next(self)

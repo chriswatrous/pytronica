@@ -50,20 +50,29 @@ cdef class Generator:
         except TypeError:
             return NotImplemented
 
-    cdef get_head(self):
+    cdef BufferNode get_head(self):
+    #cdef get_head(self):
         if self._head_uses >= len(self.iters):
             raise IndexError('get_head called too many times')
 
         if not self.head:
-            self.head = BufferNode(self, self.is_stereo())
+            self._stereo = self.is_stereo()
+            self.head = BufferNode(self, self._stereo)
+            self.generate(self.head)
 
         buf = self.head
-        
+
         # Detach head so the list can be garbage collected.
         self._head_uses += 1
         if self._head_uses == len(self.iters):
             self.head = None
 
+        return buf
+
+    cdef BufferNode get_next(self):
+    #cdef get_next(self):
+        buf = BufferNode(self, self._stereo)
+        self.generate(buf)
         return buf
 
     cdef bint is_stereo(self) except -1:
@@ -192,7 +201,6 @@ cdef class Generator:
         cdef BufferIter it
         cdef BufferNode buf
         cdef long samples
-
         samples = 0
 
         t = time()
