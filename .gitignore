@@ -2,6 +2,6 @@ build/
 *.swp
 *.pyc
 *.dll
-audio.c
 *.wav
 *.so
+*.raw

@@ -77,6 +77,26 @@ To Do:
     ADSREnvelope
     rename Signal.Pan() -> Signal.pan()
     look into having Chain derive from Compose
+    rename internal/private methods and fields to start with underscore
+    make sure all files import future division
+    clip reporting options: none, end, instant
+    make sure every song within project adds pytronica/lib to the path from with in the code
+        don't depend on $PYTHONPATH
+    new architecture:
+        recycle linked list nodes
+        Generator.set_no_recycle() method
+        check that no new starters are given out after evaluation has started
+        test error conditions
+        Compose: make sure memory is freed properly when an input is done processing
+        for any Generator where the length of self is longer than the length of one of it's inputs:
+            make sure the inputs are deleted when they are done being used, so that the memory can be freed by gc
+    make SampleBuffer class that just handles allocating and freeing the buffer memory
+    try without node recycling and see if it really makes a difference 
+    make Generator.measure_render_rate() to complement measure_time()
+    Extend class that would make a finite Generator longer or infinite
+    get rid of time measurement comments; store those in a spreadsheet instead
+    apply partial loop unrolling to everything (if more speed is needed)
+    every Generator that takes inputs needs to do something intelligent with mlength (mostly keep it the same)
 
 Doing:
 
@@ -101,3 +121,18 @@ Done:
     get rid of Mul and AmpMod
     Signal.rawwrite()
     Controller with lineto
+    new architecture:
+        linked lists of sample buffers
+        recycle linked list nodes
+        move BufferNode to separate file
+        replace Saw with Saw2 from the new architecture
+        move NoOp and Silence to a new file
+        adapt Layer to the new architecture
+        adapt Multiply to new architecture
+        make BufferIter class that handles getting next BufferNode
+        adapt ExpDecay and LinearDecay to new architecture
+        update NoOp and Silence to use BufferIter
+        adapt Compose to new architecture
+        adapt Chain to new architecture
+        adapt Controller to new architecture
+    eliminate all unsafe casting

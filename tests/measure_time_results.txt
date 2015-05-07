@@ -1,0 +1,354 @@
+------------------------------------------
+rebuild
+BUFFER_SIZE = 10000
+
+NoOp(3600)
+  time: 72.3 ns/s  average: 72.3 ns/s
+  time: 65.0 ns/s  average: 68.6 ns/s
+  time: 65.0 ns/s  average: 67.4 ns/s
+  time: 65.0 ns/s  average: 66.8 ns/s
+  time: 66.4 ns/s  average: 66.7 ns/s
+
+Silence(3600)
+  time: 24.9 us/s  average: 24.9 us/s
+  time: 25.0 us/s  average: 24.9 us/s
+  time: 25.0 us/s  average: 24.9 us/s
+  time: 24.9 us/s  average: 24.9 us/s
+  time: 24.9 us/s  average: 24.9 us/s
+
+Saw(220, 3600)
+  time:  183 us/s  average:  183 us/s
+  time:  183 us/s  average:  183 us/s
+  time:  183 us/s  average:  183 us/s
+  time:  183 us/s  average:  183 us/s
+  time:  183 us/s  average:  183 us/s
+
+Pan(NoOp(3600), -.5)
+  time:  120 us/s  average:  120 us/s
+  time:  107 us/s  average:  114 us/s
+  time:  122 us/s  average:  116 us/s
+  time:  104 us/s  average:  113 us/s
+  time:  122 us/s  average:  115 us/s
+
+Pan(Saw(220, 3600), -.5)
+  time:  308 us/s  average:  308 us/s
+  time:  309 us/s  average:  309 us/s
+  time:  308 us/s  average:  308 us/s
+  time:  309 us/s  average:  309 us/s
+  time:  308 us/s  average:  309 us/s
+
+NoOp(3600) + 0
+  time: 36.7 us/s  average: 36.7 us/s
+  time: 36.7 us/s  average: 36.7 us/s
+  time: 36.7 us/s  average: 36.7 us/s
+  time: 36.6 us/s  average: 36.7 us/s
+  time: 36.7 us/s  average: 36.7 us/s
+
+NoOp(3600) + NoOp(3600)
+  time: 94.6 us/s  average: 94.6 us/s
+  time: 94.2 us/s  average: 94.4 us/s
+  time: 95.4 us/s  average: 94.7 us/s
+  time: 94.7 us/s  average: 94.7 us/s
+  time: 95.7 us/s  average: 94.9 us/s
+
+BufferNode (aproximate) memory usage:
+  Current:   0 buffers (0 bytes)
+  Max:       4 buffers (320,000 bytes)
+  Allocated: 70 buffers (5,600,000 bytes)
+  Freed:     70 buffers (5,600,000 bytes)
+
+------------------------------------------
+no rebuild
+BUFFER_SIZE = 10000
+
+NoOp(3600)
+  time:  101 ns/s  average:  101 ns/s
+  time: 97.2 ns/s  average: 98.9 ns/s
+  time: 97.2 ns/s  average: 98.3 ns/s
+  time:  124 ns/s  average:  105 ns/s
+  time: 97.2 ns/s  average:  103 ns/s
+
+Silence(3600)
+  time: 34.2 us/s  average: 34.2 us/s
+  time: 24.8 us/s  average: 29.5 us/s
+  time: 24.8 us/s  average: 27.9 us/s
+  time: 24.8 us/s  average: 27.2 us/s
+  time: 24.8 us/s  average: 26.7 us/s
+
+Saw(220, 3600)
+  time:  182 us/s  average:  182 us/s
+  time:  182 us/s  average:  182 us/s
+  time:  182 us/s  average:  182 us/s
+  time:  182 us/s  average:  182 us/s
+  time:  182 us/s  average:  182 us/s
+
+Pan(NoOp(3600), -.5)
+  time:  105 us/s  average:  105 us/s
+  time:  106 us/s  average:  106 us/s
+  time:  110 us/s  average:  107 us/s
+  time:  112 us/s  average:  108 us/s
+  time:  114 us/s  average:  110 us/s
+
+Pan(Saw(220, 3600), -.5)
+  time:  310 us/s  average:  310 us/s
+  time:  313 us/s  average:  311 us/s
+  time:  319 us/s  average:  314 us/s
+  time:  321 us/s  average:  316 us/s
+  time:  327 us/s  average:  318 us/s
+
+NoOp(3600) + 0
+  time: 37.1 us/s  average: 37.1 us/s
+  time: 37.1 us/s  average: 37.1 us/s
+  time: 37.6 us/s  average: 37.3 us/s
+  time: 37.8 us/s  average: 37.4 us/s
+  time: 38.3 us/s  average: 37.6 us/s
+
+NoOp(3600) + NoOp(3600)
+  time:  112 us/s  average:  112 us/s
+  time:  110 us/s  average:  111 us/s
+  time:  110 us/s  average:  111 us/s
+  time:  110 us/s  average:  110 us/s
+  time:  110 us/s  average:  110 us/s
+
+BufferNode (aproximate) memory usage:
+  Current:   0 buffers (0 bytes)
+  Max:       4 buffers (320,000 bytes)
+  Allocated: 70 buffers (5,600,000 bytes)
+  Freed:     70 buffers (5,600,000 bytes)
+
+------------------------------------------
+rebuild
+BUFFER_SIZE = 1000
+
+NoOp(3600)
+  time: 1.03 us/s  average: 1.03 us/s
+  time: 1.09 us/s  average: 1.06 us/s
+  time:  977 ns/s  average: 1.03 us/s
+  time: 1.11 us/s  average: 1.05 us/s
+  time:  965 ns/s  average: 1.03 us/s
+
+Silence(3600)
+  time: 34.1 us/s  average: 34.1 us/s
+  time: 33.9 us/s  average: 34.0 us/s
+  time: 24.1 us/s  average: 30.7 us/s
+  time: 22.7 us/s  average: 28.7 us/s
+  time: 22.2 us/s  average: 27.4 us/s
+
+Saw(220, 3600)
+  time:  184 us/s  average:  184 us/s
+  time:  184 us/s  average:  184 us/s
+  time:  184 us/s  average:  184 us/s
+  time:  184 us/s  average:  184 us/s
+  time:  184 us/s  average:  184 us/s
+
+Pan(NoOp(3600), -.5)
+  time:  163 us/s  average:  163 us/s
+  time:  271 us/s  average:  217 us/s
+  time:  163 us/s  average:  199 us/s
+  time:  271 us/s  average:  217 us/s
+  time:  163 us/s  average:  206 us/s
+
+Pan(Saw(220, 3600), -.5)
+  time:  269 us/s  average:  269 us/s
+  time:  269 us/s  average:  269 us/s
+  time:  269 us/s  average:  269 us/s
+  time:  269 us/s  average:  269 us/s
+  time:  268 us/s  average:  269 us/s
+
+NoOp(3600) + 0
+  time: 32.9 us/s  average: 32.9 us/s
+  time: 32.9 us/s  average: 32.9 us/s
+  time: 33.3 us/s  average: 33.1 us/s
+  time: 32.6 us/s  average: 32.9 us/s
+  time: 33.4 us/s  average: 33.0 us/s
+
+NoOp(3600) + NoOp(3600)
+  time:  190 us/s  average:  190 us/s
+  time:  188 us/s  average:  189 us/s
+  time:  190 us/s  average:  189 us/s
+  time:  190 us/s  average:  189 us/s
+  time:  189 us/s  average:  189 us/s
+
+BufferNode (aproximate) memory usage:
+  Current:   0 buffers (0 bytes)
+  Max:       4 buffers (32,000 bytes)
+  Allocated: 70 buffers (560,000 bytes)
+  Freed:     70 buffers (560,000 bytes)
+
+------------------------------------------
+no rebuild
+BUFFER_SIZE = 1000
+
+NoOp(3600)
+  time:  968 ns/s  average:  968 ns/s
+  time:  966 ns/s  average:  967 ns/s
+  time:  972 ns/s  average:  968 ns/s
+  time:  980 ns/s  average:  971 ns/s
+  time:  976 ns/s  average:  972 ns/s
+
+Silence(3600)
+  time: 32.5 us/s  average: 32.5 us/s
+  time: 22.1 us/s  average: 27.3 us/s
+  time: 22.2 us/s  average: 25.6 us/s
+  time: 22.2 us/s  average: 24.7 us/s
+  time: 22.1 us/s  average: 24.2 us/s
+
+Saw(220, 3600)
+  time:  184 us/s  average:  184 us/s
+  time:  184 us/s  average:  184 us/s
+  time:  184 us/s  average:  184 us/s
+  time:  184 us/s  average:  184 us/s
+  time:  184 us/s  average:  184 us/s
+
+Pan(NoOp(3600), -.5)
+  time: 91.6 us/s  average: 91.6 us/s
+  time:  101 us/s  average: 96.3 us/s
+  time:  108 us/s  average:  100 us/s
+  time:  103 us/s  average:  101 us/s
+  time:  109 us/s  average:  103 us/s
+
+Pan(Saw(220, 3600), -.5)
+  time:  279 us/s  average:  279 us/s
+  time:  283 us/s  average:  281 us/s
+  time:  285 us/s  average:  282 us/s
+  time:  289 us/s  average:  284 us/s
+  time:  291 us/s  average:  285 us/s
+
+NoOp(3600) + 0
+  time: 37.8 us/s  average: 37.8 us/s
+  time: 37.9 us/s  average: 37.9 us/s
+  time: 38.0 us/s  average: 37.9 us/s
+  time: 38.4 us/s  average: 38.0 us/s
+  time: 37.8 us/s  average: 38.0 us/s
+
+NoOp(3600) + NoOp(3600)
+  time:  106 us/s  average:  106 us/s
+  time:  111 us/s  average:  108 us/s
+  time:  112 us/s  average:  110 us/s
+  time:  111 us/s  average:  110 us/s
+  time:  111 us/s  average:  110 us/s
+
+BufferNode (aproximate) memory usage:
+  Current:   0 buffers (0 bytes)
+  Max:       4 buffers (32,000 bytes)
+  Allocated: 70 buffers (560,000 bytes)
+  Freed:     70 buffers (560,000 bytes)
+
+------------------------------------------
+rebuild
+BUFFER_SIZE = 100
+
+NoOp(3600)
+  time: 9.85 us/s  average: 9.85 us/s
+  time: 9.72 us/s  average: 9.79 us/s
+  time: 9.75 us/s  average: 9.77 us/s
+  time: 9.70 us/s  average: 9.76 us/s
+  time: 9.71 us/s  average: 9.75 us/s
+
+Silence(3600)
+  time: 40.1 us/s  average: 40.1 us/s
+  time: 39.1 us/s  average: 39.6 us/s
+  time: 39.0 us/s  average: 39.4 us/s
+  time: 39.1 us/s  average: 39.3 us/s
+  time: 39.0 us/s  average: 39.3 us/s
+
+Saw(220, 3600)
+  time:  196 us/s  average:  196 us/s
+  time:  196 us/s  average:  196 us/s
+  time:  196 us/s  average:  196 us/s
+  time:  196 us/s  average:  196 us/s
+  time:  199 us/s  average:  197 us/s
+
+Pan(NoOp(3600), -.5)
+  time: 3.30 ms/s  average: 3.30 ms/s
+  time: 1.11 ms/s  average: 2.20 ms/s
+  time: 3.39 ms/s  average: 2.60 ms/s
+  time: 1.15 ms/s  average: 2.24 ms/s
+  time: 3.51 ms/s  average: 2.49 ms/s
+
+Pan(Saw(220, 3600), -.5)
+  time:  376 us/s  average:  376 us/s
+  time:  363 us/s  average:  369 us/s
+  time:  370 us/s  average:  370 us/s
+  time:  362 us/s  average:  368 us/s
+  time:  371 us/s  average:  368 us/s
+
+NoOp(3600) + 0
+  time:  168 us/s  average:  168 us/s
+  time:  165 us/s  average:  167 us/s
+  time:  167 us/s  average:  167 us/s
+  time:  165 us/s  average:  166 us/s
+  time:  167 us/s  average:  166 us/s
+
+NoOp(3600) + NoOp(3600)
+  time:  567 us/s  average:  567 us/s
+  time:  574 us/s  average:  571 us/s
+  time:  579 us/s  average:  573 us/s
+  time:  584 us/s  average:  576 us/s
+  time:  580 us/s  average:  577 us/s
+
+BufferNode (aproximate) memory usage:
+  Current:   0 buffers (0 bytes)
+  Max:       4 buffers (3,200 bytes)
+  Allocated: 70 buffers (56,000 bytes)
+  Freed:     70 buffers (56,000 bytes)
+
+------------------------------------------
+no rebuild
+BUFFER_SIZE = 100
+
+NoOp(3600)
+  time: 6.71 us/s  average: 6.71 us/s
+  time: 6.46 us/s  average: 6.58 us/s
+  time: 6.45 us/s  average: 6.54 us/s
+  time: 6.46 us/s  average: 6.52 us/s
+  time: 6.47 us/s  average: 6.51 us/s
+
+Silence(3600)
+  time: 38.9 us/s  average: 38.9 us/s
+  time: 38.9 us/s  average: 38.9 us/s
+  time: 38.9 us/s  average: 38.9 us/s
+  time: 38.9 us/s  average: 38.9 us/s
+  time: 38.9 us/s  average: 38.9 us/s
+
+Saw(220, 3600)
+  time:  196 us/s  average:  196 us/s
+  time:  198 us/s  average:  197 us/s
+  time:  196 us/s  average:  197 us/s
+  time:  197 us/s  average:  197 us/s
+  time:  197 us/s  average:  197 us/s
+
+Pan(NoOp(3600), -.5)
+  time: 2.11 ms/s  average: 2.11 ms/s
+  time: 3.31 ms/s  average: 2.71 ms/s
+  time: 3.41 ms/s  average: 2.94 ms/s
+  time: 3.33 ms/s  average: 3.04 ms/s
+  time: 3.52 ms/s  average: 3.14 ms/s
+
+Pan(Saw(220, 3600), -.5)
+  time:  388 us/s  average:  388 us/s
+  time:  380 us/s  average:  384 us/s
+  time:  377 us/s  average:  382 us/s
+  time:  379 us/s  average:  381 us/s
+  time:  376 us/s  average:  380 us/s
+
+NoOp(3600) + 0
+  time:  168 us/s  average:  168 us/s
+  time:  169 us/s  average:  169 us/s
+  time:  167 us/s  average:  168 us/s
+  time:  167 us/s  average:  168 us/s
+  time:  170 us/s  average:  168 us/s
+
+NoOp(3600) + NoOp(3600)
+  time:  515 us/s  average:  515 us/s
+  time:  528 us/s  average:  522 us/s
+  time:  524 us/s  average:  523 us/s
+  time:  524 us/s  average:  523 us/s
+  time:  527 us/s  average:  524 us/s
+
+BufferNode (aproximate) memory usage:
+  Current:   0 buffers (0 bytes)
+  Max:       4 buffers (3,200 bytes)
+  Allocated: 70 buffers (56,000 bytes)
+  Freed:     70 buffers (56,000 bytes)
+

@@ -1,71 +1,90 @@
 from __future__ import division
 
-from sig cimport Signal, BufferSignal
+from generator cimport Generator
+from bufferiter cimport BufferIter
+from buffernode cimport BufferNode
 
 include "constants.pxi"
 
-cdef class ExpDecay(BufferSignal):
-    cdef double value, step, start_value, end_value
-    cdef bint finite
+cdef class ExpDecay(Generator):
+    cdef double value, step
 
-    def __cinit__(self, double half_life, double start_value=1, double end_value=0, bint finite=True):
+    def __cinit__(self, double half_life):
         if half_life <= 0:
             raise ValueError('half_life must be a positive number')
         self.value = 1
         self.step = 2**(-1 / self.sample_rate / half_life)
-        self.start_value = start_value
-        self.end_value = end_value
-        self.finite = finite
 
-    cdef int generate(self) except -1:
-        cdef int i
-        cdef double m, b
+    cdef bint is_stereo(self) except -1:
+        return False
 
-        if self.finite and self.value < 0.0003:
-            return 0
+    cdef generate(self, BufferNode buf):
+        cdef int i, j
 
-        m = self.start_value - self.end_value
-        b = self.end_value
+        L = buf.get_left()
 
-        for i in range(BUFFER_SIZE):
-            self.left[i] = m * self.value + b
-            self.value *= self.step
+        # This is ugly but it runs about twice is fast as the non unrolled version.
 
-        return BUFFER_SIZE
+        # Fill in most of the values with this partially unrolled loop. (This runs about twice as fast
+        # as the non unrolled version.)
+        x = self.value
+        i = 0
+        while i <= BUFFER_SIZE - 20:
+            x *= self.step; L[i] = x
+            x *= self.step; L[i+1] = x
+            x *= self.step; L[i+2] = x
+            x *= self.step; L[i+3] = x
+            x *= self.step; L[i+4] = x
+            x *= self.step; L[i+5] = x
+            x *= self.step; L[i+6] = x
+            x *= self.step; L[i+7] = x
+            x *= self.step; L[i+8] = x
+            x *= self.step; L[i+9] = x
+            x *= self.step; L[i+10] = x
+            x *= self.step; L[i+11] = x
+            x *= self.step; L[i+12] = x
+            x *= self.step; L[i+13] = x
+            x *= self.step; L[i+14] = x
+            x *= self.step; L[i+15] = x
+            x *= self.step; L[i+16] = x
+            x *= self.step; L[i+17] = x
+            x *= self.step; L[i+18] = x
+            x *= self.step; L[i+19] = x
+            i += 20
+
+        # Fill in any remaining values.
+        while i < BUFFER_SIZE:
+            x *= self.step; L[i] = x
+            i += 1
+
+        self.value = x
+
+        buf.length = BUFFER_SIZE
+        buf.has_more = self.value > 0.0003
 
 
-cdef class LinearDecay(BufferSignal):
-    cdef long sample_count, total_samples,
-    cdef double m, b, end_value
-    cdef bint finite
+cdef class LinearDecay(Generator):
+    cdef double value, step
 
-    def __cinit__(self, double decay_time, double start_value=1, double end_value=0, bint finite=True):
+    def __cinit__(self, double decay_time):
         if decay_time <= 0:
             raise ValueError('decay_time must be a positive number')
-        self.finite = finite
-        self.sample_count = 0
-        self.total_samples = <long>(decay_time * self.sample_rate)
-        self.m = (end_value - start_value) / self.sample_rate / decay_time
-        self.b = start_value
-        self.end_value = end_value
+        self.value = 1
+        self.step = -1 / decay_time / self.sample_rate
 
-    cdef int generate(self) except -1:
+    cdef bint is_stereo(self) except -1:
+        return False
+
+    cdef generate(self, BufferNode buf):
         cdef int i, length
 
-        if self.finite and self.sample_count >= self.total_samples:
-                return 0
+        L = buf.get_left()
 
-        if self.sample_count <= self.total_samples + BUFFER_SIZE:
-            i = 0
-            while i < BUFFER_SIZE:
-                if self.sample_count < self.total_samples:
-                    self.left[i] = self.m * self.sample_count + self.b
-                else:
-                    if self.finite:
-                        return i
-                    else:
-                        self.left[i] = self.end_value
-                i += 1
-                self.sample_count += 1
+        for i in range(BUFFER_SIZE):
+            L[i] = self.value
+            self.value += self.step
+            if self.value < 0:
+                break
 
-        return BUFFER_SIZE
+        buf.length = i + 1
+        buf.has_more = self.value >= 0
