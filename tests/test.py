@@ -30,12 +30,6 @@ class Tests(unittest.TestCase):
         #c.add(Saw(440, .2).Pan(.5), .5)
         #m.play()
 
-    def test_sub(self):
-        c = Compose()
-        c.add(Saw(220, .5) - Saw(220, .5, phase=0.5), 0)
-        c.add(2 - Saw(220, .5), .5)
-        c.add(Saw(220, .5) - 2, 1)
-        (.5 * c).play()
 
 
     #def test_adsr(self):
@@ -108,6 +102,13 @@ class NewArchTests(unittest.TestCase):
         c1.add(s, .25)
         c2 = Chain([s, c1])
         c2.play()
+
+    def test_sub(self):
+        c = Chain()
+        c.add(Saw(220, .2) - Saw(220, .2, phase=0.5), .5)
+        c.add(2 - Saw(220, .2), .5)
+        c.add(Saw(220, .2) - 2, .5)
+        (.5 * c).play()
 
 
 class ErrorTests(unittest.TestCase):

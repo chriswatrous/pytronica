@@ -51,6 +51,12 @@ cdef class Generator:
         except TypeError:
             return NotImplemented
 
+    def __sub__(a, b):
+        try:
+            return a + (-1 * b)
+        except TypeError:
+            return NotImplemented
+
     cdef BufferNode get_head(self):
         if self._head_uses >= len(self.iters):
             raise IndexError('get_head called too many times')

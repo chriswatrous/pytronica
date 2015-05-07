@@ -21,13 +21,6 @@ def f(ss):
 part1 = f(['G3 C4 E4 B4', 'A3 D4 F#4 C5'])
 part1a = f(['E3 A3 C4 G4', 'F#3 B3 D4 A4'])
 
-#a = arp1s(['G3 C4 E4 B4', 'A3 D4 F#4 C5'])
-#part1 = 0.5 * repeat(a, 8)
-#
-#a = arp1s(['E3 A3 C4 G4', 'F#3 B3 D4 A4'])
-#part2a = 0.5 * repeat(a, 8)
-
-
 def osc(p):
     return Pan(pSaw(p + pitch_spread), -.5) + Pan(pSaw(p - pitch_spread), .5)
 
@@ -41,7 +34,7 @@ def f(d):
     return a
 
 a = f(.75)
-b = f(.5)
+b = f(.3)
 
 c = Chain()
 for x in [3, 4, 3, 4]:
@@ -49,20 +42,7 @@ for x in [3, 4, 3, 4]:
 c.mlength = b.mlength
 
 part2 = 0.25 * Chain([a, c])
-part2.play()
-exit(0)
 
-
-#for p in notes('C2 D2 A1 D2'):
-    #c.add(synth(p, .5), delay)
-    #c.add(synth(p, .5), delay + step*3)
-    #c.add(synth(p, .5), delay + step*7)
-    #c.add(synth(p, .5), delay + step*10)
-    #delay += step * 14
-
-#part2 = .25 * c
-#part2.play()
-#exit(0)
 
 def part3():
     pitch_spread = 0.1
@@ -90,11 +70,7 @@ def part3():
         c.add(synth(p), delay)
         delay += step / 2
 
-    #co = Controller(1)
-    #co.lineto(step*29, 1)
-    #co.lineto(step*33.5, 0)
-
-    return c # * ExpDecay(3) * 2
+    return c
 
 c1 = Compose()
 c1.add(3 * part1, 0)
