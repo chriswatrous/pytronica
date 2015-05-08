@@ -48,7 +48,7 @@ part2 = 0.25 * Chain([a, c])
 e = part1 * part2
 e = e * 3
 #e.playx()
-e.audacity()
+#e.audacity()
 
 
 def part3():

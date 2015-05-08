@@ -17,13 +17,31 @@ cdef double _sample_rate = 48000
 
 def set_sample_rate(r):
     """Set the global sample rate for all new objects.
-    Already existing object will still use the old sample rate."""
+    Already existing objects will still use the old sample rate."""
     global _sample_rate
     _sample_rate = r
 
 def get_sample_rate():
     """Get the global sample rate."""
     return _sample_rate
+
+# Clip reporting stuff:
+cdef bint _report_clipping_instant = True
+cdef bint _report_clipping_end = False
+
+def set_clip_reporting(setting):
+    global _report_clipping_instant, _report_clipping_end
+    if setting == 'instant':
+        _report_clipping_instant = True
+        _report_clipping_end = False
+    elif setting == 'end':
+        _report_clipping_instant = False
+        _report_clipping_end = True
+    elif setting == 'off':
+        _report_clipping_instant = False
+        _report_clipping_end = False
+    else:
+        raise ValueError("setting must be one of 'instant', 'end', or 'off'")
 
 
 cdef class Generator:
@@ -214,6 +232,9 @@ cdef class Generator:
             if not buf.has_more:
                 break
 
+        if _report_clipping_end and self._clip_max > 1:
+            print '\nClipping! (max value = {})\n'.format(self._clip_max)
+
         return stereo
 
     cdef _put_sample(self, double sample, FILE *f):
@@ -243,7 +264,8 @@ cdef class Generator:
 
         if sample > self._clip_max:
             self._clip_max = sample
-            print 'Clipping! (max value = {})'.format(self._clip_max)
+            if _report_clipping_instant:
+                print 'Clipping! (max value = {})'.format(self._clip_max)
 
     # Stuff for measuring the execution time of Generators ----------------------------------------
     def measure_time(self):

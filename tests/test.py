@@ -6,6 +6,7 @@ import time
 import sys
 sys.path.append('../lib')
 from audio import *
+set_clip_reporting('off')
 
 class Tests(unittest.TestCase):
     def test_sample_rate_changes(self):
@@ -50,7 +51,7 @@ class Tests(unittest.TestCase):
         a.play()
 
     def test_use_simul(self):
-        a = Saw(220, 1)
+        a = Saw(220, .2)
         b = a * a
         b.play()
 
@@ -96,6 +97,14 @@ class Tests(unittest.TestCase):
     def test_div(self):
         a = Saw(220, .2) / 4
         a.play()
+
+    def test_clip_reporting(self):
+        set_clip_reporting('end')
+        (Saw(220, .1) * 1.2).play()
+        set_clip_reporting('instant')
+        (Saw(220, .1) * 1.2).play()
+        set_clip_reporting('off')
+        (Saw(220, .1) * 1.2).play()
 
     # Users might expect the Mul to be stereo even if the compose becomes stereo after
     # it is hooked up to the Mul.

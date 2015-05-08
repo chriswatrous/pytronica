@@ -70,7 +70,6 @@ To Do:
     Controller.hold(), Controller.expto(), Controller.jumpto()
     ADSREnvelope
     rename internal/private methods and fields to start with underscore
-    clip reporting options: none, end, instant
     make sure every song within project adds pytronica/lib to the path from with in the code
         don't depend on $PYTHONPATH
     new architecture:
@@ -134,3 +133,4 @@ Done:
     Generator.playx()
     replace issubclass with isinstance
     make sure all files import future division
+    clip reporting options: none, end, instant
