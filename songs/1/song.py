@@ -9,18 +9,18 @@ import sys
 sys.path.append('../../lib')
 from audio import *
 
-from song1_synth import *
+from synth1 import *
 
 pitch_spread = 0.1
 
 step = .18
 
 def f(ss):
-    return 0.5 * repeat(arp1s(ss), 1000)
+    return 0.5 * repeat(arp1s(ss), 8)
 
 part1 = f(['G3 C4 E4 B4', 'A3 D4 F#4 C5'])
 part1a = part1 + f(['E3 A3 C4 G4', 'F#3 B3 D4 A4'])
-part1a.playx()
+#part1a.playx()
 
 def osc(p):
     return psaw(p + pitch_spread).pan(-.5) + psaw(p - pitch_spread).pan(.5)
@@ -43,6 +43,12 @@ for x in [3, 4, 3, 4]:
 c.mlength = b.mlength
 
 part2 = 0.25 * Chain([a, c])
+#part2.playx()
+
+e = part1 * part2
+e = e * 3
+#e.playx()
+e.audacity()
 
 
 def part3():

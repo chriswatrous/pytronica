@@ -52,9 +52,6 @@ To Do:
         maybe biquad, which could be used to create any other type of filter
         parametric EQ
         filters that can take signals as their input parameters
-    Combiners:
-        AmpMod (multiply signals, total length is length of the shortest signal)
-        Repeat (repeats a sound at regular intervals)
     Stereo:
         stereo reverb, chorus, phlanger, synths, etc.
     make sure all object can handle splitting and recombining of the signal paths
@@ -62,29 +59,21 @@ To Do:
     add comments / documentation
     delay allocation of bufferes until needed, free when done
     better note mini-language: '3 C D F A Ab C Eb -G' instead of 'C3 D3 F3 A3 Ab3 C4 Eb4 G3'
+        '2 C +D +F +A -D +Eb +G +Bb'
     measure running time of all Signal classes and report as % of real time
     play_synth function that would take a synth, notes, rhythms, durations, other params, and return a Compose
-    bug: finally clause in Signal.play() doesn't execute properly on KeyboardInterrupt
-    make Layer like class called Mul to replace existing Mul and AmpMod
-    Signal.wavwrite()
+    bug: finally clause in Generator.play() doesn't execute properly on KeyboardInterrupt
     FadeOut
     Take, Drop, and Slice classes, git rid of length argument in Saw
     relative time for Compose and Controller: set_relative_time(), set_absolute_time(), set_time()
     Signal.rawwrite() improve error handling, allow writing to stdout
     Controller.hold(), Controller.expto(), Controller.jumpto()
-    make functions void if they will never throw exceptions
     ADSREnvelope
-    rename Signal.Pan() -> Signal.pan()
-    look into having Chain derive from Compose
     rename internal/private methods and fields to start with underscore
-    make sure all files import future division
     clip reporting options: none, end, instant
     make sure every song within project adds pytronica/lib to the path from with in the code
         don't depend on $PYTHONPATH
     new architecture:
-        recycle linked list nodes
-        Generator.set_no_recycle() method
-        check that no new starters are given out after evaluation has started
         test error conditions
         Compose: make sure memory is freed properly when an input is done processing
         for any Generator where the length of self is longer than the length of one of it's inputs:
@@ -93,12 +82,13 @@ To Do:
     try without node recycling and see if it really makes a difference 
     make Generator.measure_render_rate() to complement measure_time()
     Extend class that would make a finite Generator longer or infinite
-    get rid of time measurement comments; store those in a spreadsheet instead
     apply partial loop unrolling to everything (if more speed is needed)
     every Generator that takes inputs needs to do something intelligent with mlength (mostly keep it the same)
+    build pytronica into a single .so file using setup.py
+    Generator.fft() that uses GNU octave to display a fft graph of the sound
+    Sine oscilator
 
 Doing:
-    replace issubclass with isinstance
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -142,3 +132,5 @@ Done:
     Generator.wav_write()
     Generator.audacity()
     Generator.playx()
+    replace issubclass with isinstance
+    make sure all files import future division

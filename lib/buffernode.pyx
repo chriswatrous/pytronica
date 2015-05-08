@@ -1,3 +1,5 @@
+from __future__ import division
+
 from libc.stdio cimport putc, FILE, fopen, EOF, fclose, printf
 from libc.string cimport memset, memcpy
 from libc.math cimport cos, sqrt
