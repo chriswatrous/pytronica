@@ -15,7 +15,6 @@ pitch_spread = 0.1
 
 step = .18
 
-
 def f(ss):
     return 0.5 * repeat(arp1s(ss), 1000)
 
