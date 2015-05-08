@@ -17,7 +17,6 @@ def synth1(p, pn, random_phase=0):
         osc.add(psaw(p + x, phase=random_phase*random()))
     return (osc * ExpDecay(0.3) / d).pan(pn)
 
-
 step = 0.18
 def arp1(s, pan_spread=1):
     ns = notes(s)

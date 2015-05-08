@@ -96,9 +96,9 @@ To Do:
     get rid of time measurement comments; store those in a spreadsheet instead
     apply partial loop unrolling to everything (if more speed is needed)
     every Generator that takes inputs needs to do something intelligent with mlength (mostly keep it the same)
-    replace issubclass with isinstance
 
 Doing:
+    replace issubclass with isinstance
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)

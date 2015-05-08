@@ -24,7 +24,7 @@ cdef class Layer(Generator):
             map(self.add, inputs)
 
     def add(self, input):
-        if issubclass(type(input), Generator):
+        if isinstance(input, Generator):
             self.inputs.append(input)
             self.input_iters.append((<Generator?>input).get_iter())
         else:
@@ -96,8 +96,8 @@ cdef class Layer(Generator):
 
 
 def mul(a, b):
-    a_gen = issubclass(type(a), Generator)
-    b_gen = issubclass(type(b), Generator)
+    a_gen = isinstance(a, Generator)
+    b_gen = isinstance(b, Generator)
     if a_gen and b_gen:
         return Multiply(a, b)
     elif a_gen:
