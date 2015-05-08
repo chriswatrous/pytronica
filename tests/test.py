@@ -21,23 +21,6 @@ class Tests(unittest.TestCase):
         finally:
             set_sample_rate(s)
 
-    # Users might expect the Mul to be stereo even if the compose becomes stereo after
-    # it is hooked up to the Mul.
-    #def test_stereo_mul(self):
-        #c = Compose()
-        #m = .25 * c
-        #c.add(Saw(220, .2).Pan(-.5), 0)
-        #c.add(Saw(440, .2).Pan(.5), .5)
-        #m.play()
-
-
-
-    #def test_adsr(self):
-        #a = Saw(220) * ADSREnvelope(2, .5, .5, .25, .05)
-        #a.play()
-
-
-class NewArchTests(unittest.TestCase):
     def test_saw_pan(self):
         s = Saw(220, .2)
         p1 = s.pan(.5)
@@ -112,9 +95,21 @@ class NewArchTests(unittest.TestCase):
 
     def test_div(self):
         a = Saw(220, .2) / 4
+        a.play()
+
+    # Users might expect the Mul to be stereo even if the compose becomes stereo after
+    # it is hooked up to the Mul.
+    #def test_stereo_mul(self):
+        #c = Compose()
+        #m = .25 * c
+        #c.add(Saw(220, .2).Pan(-.5), 0)
+        #c.add(Saw(440, .2).Pan(.5), .5)
+        #m.play()
+
+    #def test_adsr(self):
+        #a = Saw(220) * ADSREnvelope(2, .5, .5, .25, .05)
         #a.play()
-        #a.wav_write('out.wav')
-        a.audacity()
+
 
 class ErrorTests(unittest.TestCase):
     def test_operator_errors(self):
