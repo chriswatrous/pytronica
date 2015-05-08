@@ -9,13 +9,19 @@ from audio import *
 
 
 def main():
-    measure_stuff()
+    #measure_stuff()
     #measure_layer()
     #measure_multiply()
     #measure_envelopes()
+    measure_osc()
 
 
 # Tests ------------------------------------------------------
+
+def measure_osc():
+    measure('Saw(220).take(360)', 20)
+    measure('Sine(220).take(360)', 20)
+
 
 def measure_stuff():
     measure('NoOp(360)')
@@ -34,19 +40,12 @@ def measure_layer():
     #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
     #measure('Saw(220, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360) + Saw(330, 360)')
 
-    measure('(lambda x: x)(Saw(220, 360))')
-    measure('(lambda x: x+x)(Saw(220, 360))')
-    measure('(lambda x: x+x+x)(Saw(220, 360))')
-    measure('(lambda x: x+x+x+x)(Saw(220, 360))')
-    measure('(lambda x: x+x+x+x+x)(Saw(220, 360))')
-    measure('(lambda x: x+x+x+x+x+x)(Saw(220, 360))')
+    for n in range(6):
+        measure('(lambda x: (x' + n*'+x' + ').take(360))(Saw(220))')
 
-    #measure('NoOp(360)')
-    #measure('NoOp(360) + NoOp(360)')
-    #measure('NoOp(360)' + ' + NoOp(360)'*2)
-    #measure('NoOp(360)' + ' + NoOp(360)'*3)
-    #measure('NoOp(360)' + ' + NoOp(360)'*4)
-    #measure('NoOp(360)' + ' + NoOp(360)'*5)
+    #for n in range(6):
+        #measure('(lambda x: (x' + n*'+x' + ').take(360))(NoOp())')
+        #measure('(NoOp()' + n*'+NoOp()' + ').take(360)')
 
     mem_report()
 

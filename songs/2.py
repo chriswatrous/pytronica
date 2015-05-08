@@ -1,5 +1,8 @@
 #! /usr/bin/python
+from __future__ import division
 
+import sys
+sys.path.append('../lib')
 from audio import *
 
 #adj = 0.1

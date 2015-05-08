@@ -2,11 +2,11 @@ To Do:
     Oscillators:
         Square
         Triangle
-        Sin
         White Noise
         Quality Saw
         Quality Square
         Quality Triangle
+        Prophet 5 style triggered sawtooth
     Synthesizers:
         basic subtractive (standard analog modeling)
         additive
@@ -85,9 +85,10 @@ To Do:
     every Generator that takes inputs needs to do something intelligent with mlength (mostly keep it the same)
     build pytronica into a single .so file using setup.py
     Generator.fft() that uses GNU octave to display a fft graph of the sound
-    Sine oscilator
+    faster sine algorithm
 
 Doing:
+    Generator.take() method and Take class, get rid of length parameter in oscillators
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)
@@ -134,3 +135,4 @@ Done:
     replace issubclass with isinstance
     make sure all files import future division
     clip reporting options: none, end, instant
+    Sine oscilator

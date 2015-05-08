@@ -14,62 +14,78 @@ from generator cimport Generator
 
 include "constants.pxi"
 
-cdef class BufferNode:
-    """A linked list node that hold sample data and provides a mechanism for getting or generating the
-    next node and recycling nodes that are no longer used."""
-
-    def __cinit__(self, Generator generator, bint stereo):
-        self.reset()
-
-        self.generator = generator
-        self.stereo = stereo
-
-        if stereo:
-            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
-            self._right = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
-        else:
-            self._left = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
-            self._right = self._left
-
-        buf_count_inc(2 if self.stereo else 1)
+cdef class SampleBuffer:
+    def __cinit__(self):
+        self.data = <double *>PyMem_Malloc(BUFFER_SIZE * sizeof(double))
+        buf_count_inc()
 
     def __dealloc__(self):
-        if self._left != NULL:
-            PyMem_Free(self._left)
-        if self._right != NULL and self._right != self._left:
-            PyMem_Free(self._right)
+        PyMem_Free(self.data)
+        buf_count_dec()
 
-        buf_count_dec(2 if self.stereo else 1)
 
-    cdef reset(self):
+cdef class BufferNode:
+    """A linked list node that hold sample data."""
+
+    def __cinit__(self, Generator generator, bint stereo):
         self.next = None
         self.has_more = True
         self.length = 0
         self.uses = 0
+        self._left = None
+        self._right = None
+        self._shared = False
+
+        self.generator = generator
+        self.stereo = stereo
 
     cdef clear(self):
-        memset(self._left, 0, BUFFER_SIZE * sizeof(double))
-        if self._right != self._left:
-            memset(self._right, 0, BUFFER_SIZE * sizeof(double))
+        if self._left == None:
+            self._allocate()
 
-    cdef copyfrom(self, BufferNode buf):
-        if self.stereo != buf.stereo:
-            fmt = "Number of channels doesn't match. self.stereo = {}, buf.stereo = {}"
-            raise TypeError(fmt.format(self.stereo, buf.stereo))
-        memcpy(self._left, buf._left, BUFFER_SIZE * sizeof(double))
-        if self._right != self._left:
-            memcpy(self._right, buf._right, BUFFER_SIZE * sizeof(double))
+        memset(self._left.data, 0, BUFFER_SIZE * sizeof(double))
 
-    # Keep these as functions rather than fields. This encourages saving the pointer as a local variable.
-    # In a tight loop, using the pointer in a local variable is a little faster than getting the pointer
-    # from an object field every iteration of the loop. (confirmed by testing)
+        if self._right != self._left:
+            memset(self._right.data, 0, BUFFER_SIZE * sizeof(double))
+
+    cdef copy_from(self, BufferNode buf):
+        """Copy the data from another BufferNode. Use this if the data will be modified."""
+        if not self.stereo and buf.stereo:
+            raise TypeError('Cannot copy stereo data to a mono buffer')
+
+        if self._left == None:
+            self._allocate()
+
+        memcpy(self._left.data, buf._left.data, BUFFER_SIZE * sizeof(double))
+
+        if self._right != self._left:
+            memcpy(self._right.data, buf._right.data, BUFFER_SIZE * sizeof(double))
+
+    cdef share_from(self, BufferNode buf):
+        """Share the buffers from another BufferNode. Only use this if the data will not be modified."""
+        if not self.stereo and buf.stereo:
+            raise TypeError('A mono buffer cannot share stereo data.')
+
+        self._left = buf._left
+        self._right = buf._right
+
     cdef double *get_left(self):
         """Get a pointer to the left buffer."""
-        return self._left
+        if self._left == None:
+            self._allocate()
+
+        return self._left.data
 
     cdef double *get_right(self):
         """Get a pointer to the right buffer."""
-        return self._right
+        if self._right == None:
+            self._allocate()
+
+        return self._right.data
+
+    cdef _allocate(self):
+        self._left = SampleBuffer()
+        self._right = SampleBuffer() if self.stereo else self._left
 
 
 # Memory tracking stuff --------------------------------------------
@@ -79,16 +95,16 @@ cdef int _max_buffers
 cdef int _allocated_buffers
 cdef int _freed_buffers
 
-cdef buf_count_inc(channels):
+cdef buf_count_inc():
     global _num_buffers, _max_buffers, _allocated_buffers
-    _num_buffers += channels
+    _num_buffers += 1
     _max_buffers = imax(_max_buffers, _num_buffers)
-    _allocated_buffers += channels
+    _allocated_buffers += 1
 
-cdef buf_count_dec(channels):
+cdef buf_count_dec():
     global _num_buffers, _freed_buffers
-    _num_buffers -= channels
-    _freed_buffers += channels
+    _num_buffers -= 1
+    _freed_buffers += 1
 
 def mem_report():
     n = BUFFER_SIZE * sizeof(double)

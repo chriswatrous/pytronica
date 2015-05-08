@@ -11,7 +11,8 @@ set_clip_reporting('off')
 class Tests(unittest.TestCase):
     def test_sample_rate_changes(self):
         def play_sound():
-            (.25 * Saw(p2f(60), 0.5)).play()
+            a = .25 * Saw(p2f(60)).take(.5)
+            a.play()
         try:
             s = get_sample_rate()
             self.assertEqual(s, 48000)
@@ -22,26 +23,30 @@ class Tests(unittest.TestCase):
         finally:
             set_sample_rate(s)
 
+    def test_take_short(self):
+        a = Saw(220).take(.01)
+        a.play()
+
     def test_saw_pan(self):
-        s = Saw(220, .2)
+        s = Saw(220).take(.2)
         p1 = s.pan(.5)
         p2 = s.pan(-.5)
         p1.play()
         p2.play()
 
     def test_layer(self):
-        a = Saw(note_freq('C4'), .2) + Saw(note_freq('E4'), .2)
+        a = Saw(note_freq('C4')).take(.2) + Saw(note_freq('E4')).take(.2)
         b = a + 1.9
         a.play()
         b.play()
 
     def test_const_mul(self):
-        a = Saw(note_freq('C4'), .2) * .25
+        a = Saw(note_freq('C4')).take(.2) * .25
         a.play()
 
     def test_mul(self):
         f1, f2 = note_freqs('C5 E5')
-        a = Saw(f1, 20) * Saw(f2, .2)
+        a = Saw(f1) * Saw(f2).take(.2)
         a.play()
 
     def test_decays(self):
@@ -51,21 +56,21 @@ class Tests(unittest.TestCase):
         a.play()
 
     def test_use_simul(self):
-        a = Saw(220, .2)
+        a = Saw(220).take(.2)
         b = a * a
         b.play()
 
     def test_compose(self):
         c = Compose()
-        c.add(Saw(220, .2), 0)
-        c.add(Saw(330, .2), .2)
+        c.add(Saw(220).take(.2), 0)
+        c.add(Saw(330).take(.2), .2)
         c.play()
 
     def test_chain(self):
         f1, f2 = note_freqs('C4 F#3')
-        a = Saw(f1, .2)
+        a = Saw(f1).take(.2)
         a.mlength = .2
-        b = Saw(f2, .2)
+        b = Saw(f2).take(.2)
         b.mlength = .2
         ch = Chain([a, b])
         ch.play()
@@ -80,7 +85,7 @@ class Tests(unittest.TestCase):
         a.play()
 
     def test_chain_bug(self):
-        s = Saw(220, .1)
+        s = Saw(220).take(.1)
         s.mlength = .5
         c1 = Chain()
         c1.add(s, .25)
@@ -89,34 +94,37 @@ class Tests(unittest.TestCase):
 
     def test_sub(self):
         c = Chain()
-        c.add(Saw(220, .2) - Saw(220, .2, phase=0.5), .5)
-        c.add(2 - Saw(220, .2), .5)
-        c.add(Saw(220, .2) - 2, .5)
+        c.add(Saw(220).take(.2) - Saw(220, 0.5).take(.2), .5)
+        c.add(2 - Saw(220).take(.2), .5)
+        c.add(Saw(220).take(.2) - 2, .5)
         (.5 * c).play()
 
     def test_div(self):
-        a = Saw(220, .2) / 4
+        a = Saw(220).take(.2) / 4
         a.play()
 
     def test_clip_reporting(self):
         set_clip_reporting('end')
-        (Saw(220, .1) * 1.2).play()
+        (Saw(220).take(.1) * 1.2).play()
         set_clip_reporting('instant')
-        (Saw(220, .1) * 1.2).play()
+        (Saw(220).take(.1) * 1.2).play()
         set_clip_reporting('off')
-        (Saw(220, .1) * 1.2).play()
+        (Saw(220).take(.1) * 1.2).play()
+
+    def test_sine(self):
+        Sine(440).take(.2).play()
 
     # Users might expect the Mul to be stereo even if the compose becomes stereo after
     # it is hooked up to the Mul.
-    #def test_stereo_mul(self):
-        #c = Compose()
-        #m = .25 * c
-        #c.add(Saw(220, .2).Pan(-.5), 0)
-        #c.add(Saw(440, .2).Pan(.5), .5)
-        #m.play()
+    def test_stereo_mul(self):
+        c = Compose()
+        m = .25 * c
+        c.add(Saw(220).take(.2).pan(-.5), 0)
+        c.add(Saw(440).take(.2).pan(.5), .5)
+        m.play()
 
     #def test_adsr(self):
-        #a = Saw(220) * ADSREnvelope(2, .5, .5, .25, .05)
+        #a = Saw(220) * ADSREnvelope(attack=.5, decay=.5, sustain=.25, release=.05, length=2)
         #a.play()
 
 

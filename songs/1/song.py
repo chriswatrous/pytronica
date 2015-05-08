@@ -98,5 +98,6 @@ a = c
 a *= .2
 
 a.play()
+#print a.measure_rate()
 
 mem_report()

@@ -9,6 +9,7 @@ from buffernode cimport BufferNode
 from bufferiter cimport BufferIter
 from combiners import Layer, mul
 from modifiers import Pan
+from misc import Take
 
 include "constants.pxi"
 
@@ -91,6 +92,9 @@ cdef class Generator:
     # Convenience methods -------------------------------------------------------------------------
     def pan(self, p):
         return Pan(self, p)
+
+    def take(self, length):
+        return Take(self, length)
 
     # ---------------------------------------------------------------------------------------------
     cdef BufferNode get_head(self):

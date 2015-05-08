@@ -14,7 +14,7 @@ def stereo_spread(signals, spread, center_first = False):
     if center_first:
         signals = first_to_center(signals)
     pans = f_range(-spread, spread, len(signals))
-    return sum(s.Pan(p) for (s, p) in zip(signals, pans))
+    return sum(s.pan(p) for (s, p) in zip(signals, pans))
 
 def first_to_center(xs):
     left = True

@@ -64,7 +64,7 @@ cdef class Layer(Generator):
 
             if first:
                 first = False
-                buf.copyfrom(I_buf)
+                buf.copy_from(I_buf)
             else:
                 if buf.stereo:
                     for i in range(I_buf.length):
