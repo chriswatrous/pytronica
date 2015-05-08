@@ -15,11 +15,13 @@ pitch_spread = 0.1
 
 step = .18
 
+
 def f(ss):
-    return 0.5 * repeat(arp1s(ss), 8)
+    return 0.5 * repeat(arp1s(ss), 1000)
 
 part1 = f(['G3 C4 E4 B4', 'A3 D4 F#4 C5'])
-part1a = f(['E3 A3 C4 G4', 'F#3 B3 D4 A4'])
+part1a = part1 + f(['E3 A3 C4 G4', 'F#3 B3 D4 A4'])
+part1a.playx()
 
 def osc(p):
     return psaw(p + pitch_spread).pan(-.5) + psaw(p - pitch_spread).pan(.5)

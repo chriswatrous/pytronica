@@ -27,13 +27,13 @@ def get_sample_rate():
 
 
 cdef class Generator:
-    """Abstract base class for objects that generate (or modify) sample data."""
+    """Abstract base class for objects that generate or modify sample data."""
 
     def __cinit__(self):
         self.sample_rate = _sample_rate
         self.head = None
         self.spare = None
-        self.iters = []
+        self._iters = []
         self._head_uses = 0
         self.mlength = 0
 
@@ -76,7 +76,7 @@ cdef class Generator:
 
     # ---------------------------------------------------------------------------------------------
     cdef BufferNode get_head(self):
-        if self._head_uses >= len(self.iters):
+        if self._head_uses >= len(self._iters):
             raise IndexError('get_head called too many times')
 
         if not self.head:
@@ -88,7 +88,7 @@ cdef class Generator:
 
         # Detach head so the list can be garbage collected.
         self._head_uses += 1
-        if self._head_uses == len(self.iters):
+        if self._head_uses == len(self._iters):
             self.head = None
 
         return buf
@@ -105,18 +105,23 @@ cdef class Generator:
         raise NotImplementedError
 
     cdef get_iter(self):
-        if any((<BufferIter?>x).started for x in self.iters):
+        if any((<BufferIter?>x).started for x in self._iters):
             raise IndexError('Cannot use a Generator as an input after generation has already started.')
 
         it = BufferIter(self)
-        self.iters.append(it)
+        self._iters.append(it)
         return it
 
+    # Output stuff --------------------------------------------------------------------------------
     def play(self):
+        """Play the sound."""
         cdef double sample
         cdef short output_sample
         cdef FILE *fifo
         cdef bint stereo
+
+        with open('/dev/null', 'w') as f:
+            call('rm /tmp/fifo-*', shell=True, stdout=f, stderr=f)
 
         self._clip_max = 0
         stereo = self.is_stereo()
@@ -133,7 +138,7 @@ cdef class Generator:
 
             # The FIFO must be opened after aplay is started.
             fifo = fopen(fifo_name, 'w')
-            self.write_output(fifo)
+            self._write_output(fifo)
             fclose(fifo)
 
             # aplay should receive an EOF and quit when the FIFO is closed.
@@ -147,15 +152,21 @@ cdef class Generator:
                 player_proc.terminate()
             call(['rm', fifo_name])
 
-    def raw_write(self, filename):
-        cdef FILE *f
+    def playx(self):
+        """Play and exit."""
+        self.play()
+        exit(0)
 
+    def raw_write(self, filename):
+        """Write a raw audio file."""
+        cdef FILE *f
         f = fopen(filename, 'w')
-        stereo = self.write_output(f)
+        stereo = self._write_output(f)
         fclose(f)
         return stereo
 
     def wav_write(self, filename):
+        """Write a wav file."""
         temp_file = '/tmp/{}.raw'.format(randrange(1e9))
         stereo = self.raw_write(temp_file)
         channels = 2 if stereo else 1
@@ -170,12 +181,16 @@ cdef class Generator:
         call(['rm', temp_file])
 
     def audacity(self):
+        """Save to temp wav file and open in audacity."""
         temp_file = '/tmp/{}.wav'.format(randrange(1e9))
         self.wav_write(temp_file)
         with open('/dev/null') as f:
             call(['audacity', temp_file], stderr=f)
+        call(['rm', temp_file])
+        exit(0)
 
-    cdef write_output(self, FILE *f):
+    # Output implementation stuff -----------------------------------------------------------------
+    cdef _write_output(self, FILE *f):
         cdef BufferNode buf
         cdef BufferIter it
 
@@ -190,27 +205,27 @@ cdef class Generator:
 
             if stereo:
                 for i in range(buf.length):
-                    self.put_sample(L[i], f)
-                    self.put_sample(R[i], f)
+                    self._put_sample(L[i], f)
+                    self._put_sample(R[i], f)
             else:
                 for i in range(buf.length):
-                    self.put_sample(L[i], f)
+                    self._put_sample(L[i], f)
 
             if not buf.has_more:
                 break
 
         return stereo
 
-    cdef put_sample(self, double sample, FILE *f):
+    cdef _put_sample(self, double sample, FILE *f):
         cdef short output_sample
         cdef int r1, r2
 
         if sample > 1:
-            self.report_clipping(sample)
+            self._report_clipping(sample)
             sample = 1
 
         if sample < -1:
-            self.report_clipping(sample)
+            self._report_clipping(sample)
             sample = -1
 
         output_sample = <short>(sample * 0x7FFF)
@@ -222,7 +237,7 @@ cdef class Generator:
         if r1 == EOF or r2 == EOF:
             raise EOFError
 
-    cdef report_clipping(self, double sample):
+    cdef _report_clipping(self, double sample):
         if sample < 0:
             sample *= -1
 
