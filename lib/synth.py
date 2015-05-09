@@ -2,12 +2,15 @@ from __future__ import division
 
 from collections import deque
 
-from osc import Saw
+from osc import Saw, Sine
 from util import f_range, p2f
 from compose import Compose, Chain
 
 def psaw(p, *args, **kwargs):
     return Saw(p2f(p), *args, **kwargs)
+
+def psine(p, *args, **kwargs):
+    return Sine(p2f(p), *args, **kwargs)
 
 def stereo_spread(signals, spread, center_first = False):
     signals = list(signals)

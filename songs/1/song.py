@@ -20,7 +20,7 @@ def f(ss):
 
 part1 = f(['G3 C4 E4 B4', 'A3 D4 F#4 C5'])
 part1a = part1 + f(['E3 A3 C4 G4', 'F#3 B3 D4 A4'])
-#part1a.playx()
+#part1.playx()
 
 def osc(p):
     return psaw(p + pitch_spread).pan(-.5) + psaw(p - pitch_spread).pan(.5)
@@ -84,7 +84,7 @@ c1.add(3 * part1, 0)
 c1.add(5 * part2, 0)
 
 c2 = Compose()
-c2.add(3 * (part1 + part1a), 0)
+c2.add(3 * part1a, 0)
 c2.add(5 * part2, 0)
 c2.add(part3(), step*4*14)
 

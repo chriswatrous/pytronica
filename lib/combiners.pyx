@@ -5,7 +5,7 @@ from libc.string cimport memset
 from generator cimport Generator
 from buffernode cimport BufferNode
 from bufferiter cimport BufferIter
-from c_util cimport imax, imin
+from c_util cimport imax, imin, dmin, dmax
 
 #from compose import Compose
 
@@ -24,9 +24,12 @@ cdef class Layer(Generator):
             map(self.add, inputs)
 
     def add(self, input):
+        cdef Generator gen
         if isinstance(input, Generator):
-            self.inputs.append(input)
-            self.input_iters.append((<Generator?>input).get_iter())
+            gen = input
+            self.inputs.append(gen)
+            self.input_iters.append(gen.get_iter())
+            self.mlength = dmax(self.mlength, gen.mlength)
         else:
             self.C += input
 
@@ -115,6 +118,7 @@ cdef class ConstMultiply(Generator):
     def __init__(self, Generator input, double const_factor):
         self.A = input.get_iter()
         self.C = const_factor
+        self.mlength = input.mlength
 
     cdef bint is_stereo(self) except -1:
         return self.A.generator.is_stereo()
@@ -150,6 +154,7 @@ cdef class Multiply(Generator):
     def __init__(self, Generator a, Generator b):
         self.A = a.get_iter()
         self.B = b.get_iter()
+        self.mlength = dmin(a.mlength, b.mlength)
 
     cdef bint is_stereo(self) except -1:
         return self.A.generator.is_stereo() or self.B.generator.is_stereo()

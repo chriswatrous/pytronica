@@ -19,6 +19,8 @@ cdef class Pan(Generator):
 
         self.A = input.get_iter()
 
+        self.mlength = input.mlength
+
         # "Circualar" panning law. -3dB in the middle.
         # This one sounds better than triangle.
         self.LC = cos((1 + pan)*PI/4) * sqrt(2)

@@ -114,14 +114,49 @@ class Tests(unittest.TestCase):
     def test_sine(self):
         Sine(440).take(.2).play()
 
-    # Users might expect the Mul to be stereo even if the compose becomes stereo after
-    # it is hooked up to the Mul.
     def test_stereo_mul(self):
         c = Compose()
         m = .25 * c
+        # (Compose becomes stereo after it is used as an input.)
         c.add(Saw(220).take(.2).pan(-.5), 0)
         c.add(Saw(440).take(.2).pan(.5), .5)
         m.play()
+
+    def test_mul_const_mlength(self):
+        a = Sine(440).take(.1)
+        a.mlength = .2
+        a *= .5
+        c = Chain()
+        for _ in range(4):
+            c.add(a)
+        c.play()
+
+    def test_mul_mlength(self):
+        a = Sine(440).take(.1)
+        a.mlength = .2
+        a = a * a
+        c = Chain()
+        for _ in range(4):
+            c.add(a)
+        c.play()
+
+    def test_layer_mlength(self):
+        a = Sine(440).take(.1)
+        a.mlength = .2
+        a = a + 1
+        c = Chain()
+        for _ in range(4):
+            c.add(a)
+        c.play()
+
+    def test_pan_mlength(self):
+        a = Sine(440).take(.1)
+        a.mlength = .2
+        a = a.pan(-.5)
+        c = Chain()
+        for _ in range(4):
+            c.add(a)
+        c.play()
 
     #def test_adsr(self):
         #a = Saw(220) * ADSREnvelope(attack=.5, decay=.5, sustain=.25, release=.05, length=2)
