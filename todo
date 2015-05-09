@@ -87,6 +87,7 @@ To Do:
     faster sine algorithm
 
 Doing:
+    Generator.drop(), Generator.slice()
 
 Done:
     Layer (adds sounds together at the same time, total length is length of the longest signal)

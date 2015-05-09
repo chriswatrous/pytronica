@@ -9,7 +9,7 @@ from buffernode cimport BufferNode
 from bufferiter cimport BufferIter
 from combiners import Layer, mul
 from modifiers import Pan
-from misc import Take
+from misc import Take, Drop
 
 include "constants.pxi"
 
@@ -95,6 +95,14 @@ cdef class Generator:
 
     def take(self, length):
         return Take(self, length)
+
+    def drop(self, length):
+        return Drop(self, length)
+
+    def slice(self, start, end):
+        if end < start:
+            raise ValueError('end must be greater than or equal to start')
+        return self.drop(start).take(end - start)
 
     # ---------------------------------------------------------------------------------------------
     cdef BufferNode get_head(self):

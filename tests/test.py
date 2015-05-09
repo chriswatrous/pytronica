@@ -158,6 +158,23 @@ class Tests(unittest.TestCase):
             c.add(a)
         c.play()
 
+    def test_drop(self):
+        f1, f2 = note_freqs('C4 E4')
+        c = Chain()
+        c.add(Sine(f1).take(.2), .2)
+        c.add(Sine(f2).take(.2), .2)
+        c = c.drop(.15)
+        c.play()
+
+    def test_slice(self):
+        f1, f2 = note_freqs('C4 E4')
+        c = Chain()
+        c.add(Sine(f1).take(.2), .2)
+        c.add(Sine(f2).take(.2), .2)
+        c = c.slice(.15,.25)
+        c.audacity()
+        c.play()
+
     #def test_adsr(self):
         #a = Saw(220) * ADSREnvelope(attack=.5, decay=.5, sustain=.25, release=.05, length=2)
         #a.play()
