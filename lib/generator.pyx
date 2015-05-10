@@ -163,7 +163,7 @@ cdef class Generator:
 
             # Start aplay.
             channels = '2' if stereo else '1'
-            cmd = ['aplay', '-f', 'S16_LE', '-c', channels, '-r', str(int(_sample_rate)), fifo_name]
+            cmd = ['aplay', '-f', 'S16_LE', '-c', channels, '-r', str(int(self.sample_rate)), fifo_name]
             player_proc = Popen(cmd)
 
             # The FIFO must be opened after aplay is started.
