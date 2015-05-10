@@ -64,12 +64,12 @@ def bass():
 #bass()
 
 def vibrato():
-    step = 2
+    step = 2.5
     c = Controller(0)
     c.lineto(.7, 0)
     c.lineto(1.5, 1)
     c.lineto(100, 1)
-    c *= 8 * Sine(5)
+    c *= 8*Sine(5)
     def synth(p):
         f = p2f(p) + c
         return Saw(f, random()) * ExpDecay(.7)
@@ -77,7 +77,7 @@ def vibrato():
         a = Layer()
         for p in notes(s):
             a.add(synth(p))
-        return a
+        return a #* (1 + .2*c)
     a = Chain()
     a.add(synth2('Ab3 Db4 Eb4 G4'), step)
     a.add(synth2('F3 Bb3 C4 Eb4'), step)
@@ -91,4 +91,35 @@ def vibrato():
     a *= .2
     a.play()
     #a.audacity()
-vibrato()
+#vibrato()
+
+def aliasing():
+    c = Controller(5000)
+    c.lineto(5, 20000)
+    a = Saw(5000+100*Sine(1))
+    a *= .2
+    a.play()
+#aliasing()
+
+def high_freq():
+    c = Chain()
+    c.add(Sine(5000).take(1), 1)
+    c.add(Sine(6000).take(1), 1)
+    c.add(Sine(7000).take(1), 1)
+    c.add(Sine(8000).take(1), 1)
+    c.add(Sine(9000).take(1), 1)
+    c.add(Sine(10000).take(1), 1)
+    c.add(Sine(11000).take(1), 1)
+    c.add(Sine(12000).take(1), 1)
+    c.add(Sine(13000).take(1), 1)
+    c.add(Sine(14000).take(1), 1)
+    c.add(Sine(15000).take(1), 1)
+    c.add(Sine(16000).take(1), 1)
+    c.add(Sine(17000).take(1), 1)
+    c.add(Sine(18000).take(1), 1)
+    c.add(Sine(19000).take(1), 1)
+    c.add(Sine(22000).take(1), 1)
+    c *= .5
+    c.play()
+    #c.audacity()
+high_freq()
