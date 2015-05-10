@@ -1,87 +1,80 @@
-To Do:
-    Oscillators:
-        Square
-        Triangle
-        White Noise
-        Quality Saw
-        Quality Square
-        Quality Triangle
-        Prophet 5 style triggered sawtooth
-    Synthesizers:
-        basic subtractive (standard analog modeling)
-        additive
-            with exp decaying sine waves, which would be easy to implement as a recurance relation
-        FM
-        something like Absynth
-        something like Massive
-        that multi-saw synth I made in Reaktor
-        study synths in Reaktor and in FL Studio
-    Envelopes:
-        AR
-        others
-        arbitrary control signal
-        ExpLinDecay:
-            x[n] = a*x[n-1] - b
-            OR
-            v[n] = v[n-1] - a
-            w[n] = b*w[n-1]
-            x[n] = w[n] + w[n]
-        explore recurance relations to see what curves I can produce
-    Modifiers:
-        Add
-        MulAdd
-        Take
-        MemoryDelay
-        ProcessDelay
-        Convolution
-        Reverb (algorithmic)
-        Interpolating Delay
-        Chorus
-        Phlanger
-        delay with feedback
-        waveshapers:
-            Clip
-            SinShape
-            Saturate
-    Filters:
-        1 pole low pass
-        1 pole high pass
-        2 pole low pass
-        2 pole band pass
-        2 pole high pass
-        maybe biquad, which could be used to create any other type of filter
-        parametric EQ
-        filters that can take signals as their input parameters
-    Stereo:
-        stereo reverb, chorus, phlanger, synths, etc.
-    make sure all object can handle splitting and recombining of the signal paths
-    in general all parameters should be able to take signals or constants as inputs
-    add comments / documentation
-    delay allocation of bufferes until needed, free when done
-    better note mini-language: '3 C D F A Ab C Eb -G' instead of 'C3 D3 F3 A3 Ab3 C4 Eb4 G3'
-        '2 C +D +F +A -D +Eb +G +Bb'
-    measure running time of all Signal classes and report as % of real time
-    play_synth function that would take a synth, notes, rhythms, durations, other params, and return a Compose
-    bug: finally clause in Generator.play() doesn't execute properly on KeyboardInterrupt
-    FadeOut
-    Take, Drop, and Slice classes, git rid of length argument in Saw
-    relative time for Compose and Controller: set_relative_time(), set_absolute_time(), set_time()
-    Signal.rawwrite() improve error handling, allow writing to stdout
-    Controller.hold(), Controller.expto(), Controller.jumpto()
-    ADSREnvelope
-    rename internal/private methods and fields to start with underscore
-    make sure every song within project adds pytronica/lib to the path from with in the code
-        don't depend on $PYTHONPATH
-    new architecture:
-        test error conditions
-        Compose: make sure memory is freed properly when an input is done processing
-        for any Generator where the length of self is longer than the length of one of it's inputs:
-            make sure the inputs are deleted when they are done being used, so that the memory can be freed by gc
-    make SampleBuffer class that just handles allocating and freeing the buffer memory
-    try without node recycling and see if it really makes a difference 
-    make Generator.measure_render_rate() to complement measure_time()
-    Extend class that would make a finite Generator longer or infinite
-    apply partial loop unrolling to everything (if more speed is needed)
-    build pytronica into a single .so file using setup.py
-    Generator.fft() that uses GNU octave to display a fft graph of the sound
+Oscillators:
+    Square
+    Triangle
+    White Noise
+    Quality Saw
+    Quality Square
+    Quality Triangle
+    Prophet 5 style triggered sawtooth
     faster sine algorithm
+Synthesizers:
+    basic subtractive (standard analog modeling)
+    additive
+        with exp decaying sine waves, which would be easy to implement as a recurance relation
+    FM
+    something like Absynth
+    something like Massive
+    that multi-saw synth I made in Reaktor
+    study synths in Reaktor and in FL Studio
+Envelopes:
+    AR
+    others
+    arbitrary control signal
+    ExpLinDecay:
+        x[n] = a*x[n-1] - b
+        OR
+        v[n] = v[n-1] - a
+        w[n] = b*w[n-1]
+        x[n] = w[n] + w[n]
+    explore recurance relations to see what curves I can produce
+Modifiers:
+    Add
+    MulAdd
+    Take
+    MemoryDelay
+    ProcessDelay
+    Convolution
+    Reverb (algorithmic)
+    Interpolating Delay
+    Chorus
+    Phlanger
+    delay with feedback
+    waveshapers:
+        Clip
+        SinShape
+        Saturate
+Filters:
+    1 pole low pass
+    1 pole high pass
+    2 pole low pass
+    2 pole band pass
+    2 pole high pass
+    maybe biquad, which could be used to create any other type of filter
+    parametric EQ
+    filters that can take signals as their input parameters
+Stereo:
+    stereo reverb, chorus, phlanger, synths, etc.
+in general all parameters should be able to take signals or constants as inputs
+add comments / documentation
+delay allocation of bufferes until needed, free when done
+better note mini-language: '3 C D F A Ab C Eb -G' instead of 'C3 D3 F3 A3 Ab3 C4 Eb4 G3'
+    '2 C +D +F +A -D +Eb +G +Bb'
+play_synth function that would take a synth, notes, rhythms, durations, other params, and return a Compose
+bug: finally clause in Generator.play() doesn't execute properly on KeyboardInterrupt
+FadeOut
+relative time for Controller: set_relative_time(), set_absolute_time(), set_time()
+Generator.raw_write() improve error handling, allow writing to stdout
+Controller.hold(), Controller.expto(), Controller.jumpto()
+ADSREnvelope
+rename internal/private methods and fields to start with underscore
+make sure every song within project adds pytronica/lib to the path from with in the code
+    don't depend on $PYTHONPATH
+new architecture:
+    test error conditions
+    Compose: make sure memory is freed properly when an input is done processing
+    for any Generator where the length of self is longer than the length of one of it's inputs:
+        make sure the inputs are deleted when they are done being used, so that the memory can be freed by gc
+Extend class that would make a finite Generator longer or infinite
+apply partial loop unrolling to everything (if more speed is needed)
+build pytronica into a single .so file using setup.py
+Generator.fft() that uses GNU octave to display a fft graph of the sound
