@@ -176,6 +176,14 @@ class Tests(unittest.TestCase):
         c = c.slice(.15,.25)
         compare_outputs(c, 'outputs/slice.wav')
 
+    def test_variable_saw(self):
+        c = Chain()
+        c.add(Saw(220 + 50*Saw(4, .5)).take(1), 1)
+        c.add(Saw(220, 2*Sine(4)).take(1), 1)
+        #c.play()
+        #c.audacity()
+        compare_outputs(c, 'outputs/variable_saw.wav')
+
 
 class ErrorTests(unittest.TestCase):
     def test_operator_errors(self):

@@ -78,3 +78,7 @@ Extend class that would make a finite Generator longer or infinite
 apply partial loop unrolling to everything (if more speed is needed)
 build pytronica into a single .so file using setup.py
 Generator.fft() that uses GNU octave to display a fft graph of the sound
+Generator.left() and Generator.right() that would get the left or right channels of a stereo sound
+all local variables that should be int, long, double need to have type declarations
+
+variable saw oscillator

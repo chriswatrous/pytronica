@@ -14,5 +14,5 @@ from modifiers import Pan
 from combiners import Layer
 from envelopes import ExpDecay, LinearDecay
 from compose import Compose, Chain
-from misc import Silence, NoOp
+from misc import Silence, NoOp, Const
 from osc import Saw, Sine

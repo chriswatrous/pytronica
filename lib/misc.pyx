@@ -31,6 +31,27 @@ cdef class NoOp(Generator):
         buf.has_more = True
 
 
+cdef class Const(Generator):
+    cdef BufferNode _value_node
+
+    def __cinit__(self, double value):
+        cdef int i
+
+        self._value_node = BufferNode(None, False)
+        L = self._value_node.get_left()
+
+        for i in range(BUFFER_SIZE):
+            L[i] = value
+
+    cdef bint is_stereo(self) except -1:
+        return False
+
+    cdef generate(self, BufferNode buf):
+        buf.share_from(self._value_node)
+        buf.length = BUFFER_SIZE
+        buf.has_more = True
+
+
 cdef class Take(Generator):
     cdef BufferIter _input_iter
     cdef long _samples_left
@@ -74,7 +95,7 @@ cdef class Drop(Generator):
 
     cdef generate(self, BufferNode buf):
         cdef BufferNode I_buf
-        cdef int a
+        cdef int a, offset, length
 
         if self._starting:
             self._starting = False
