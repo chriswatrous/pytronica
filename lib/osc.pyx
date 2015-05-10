@@ -115,8 +115,8 @@ cdef class Saw(Generator):
 
         self._value = saw_adjust(x)
 
-        buf.length = F_buf.length
-        buf.has_more = F_buf.has_more
+        buf.length = length
+        buf.has_more = F_buf.has_more and P_buf.has_more
 
 
 cdef inline double saw_next(double value, double step):
