@@ -180,8 +180,6 @@ class Tests(unittest.TestCase):
         c = Chain()
         c.add(Saw(220 + 50*Saw(4, .5)).take(1), 1)
         c.add(Saw(220, 2*Sine(4)).take(1), 1)
-        #c.play()
-        #c.audacity()
         compare_outputs(c, 'outputs/variable_saw.wav')
 
 
