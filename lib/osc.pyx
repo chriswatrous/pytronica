@@ -5,6 +5,11 @@ from __future__ import division
 from math import sin, cos, pi
 
 from libc.math cimport fmod
+from libc.time cimport time
+from libc.stdlib cimport rand, srand, RAND_MAX
+
+srand(time(NULL))
+#srand(123456789)
 
 from generator cimport Generator
 from buffernode cimport BufferNode
@@ -165,6 +170,38 @@ cdef class Sine(Generator):
 
         self._value_re = V_re
         self._value_im = V_im
+
+        buf.length = BUFFER_SIZE
+        buf.has_more = True
+
+
+cdef class Noise(Generator):
+    cdef bint _stereo_out
+
+    def __cinit__(self, bint stereo=False):
+        self._stereo_out = stereo
+
+    cdef bint is_stereo(self) except -1:
+        return self._stereo_out
+
+    cdef generate(self, BufferNode buf):
+        cdef int i
+
+        L = buf.get_left()
+        R = buf.get_right()
+
+        if buf.stereo:
+            for i in range(BUFFER_SIZE):
+                #L[i] = (<double>rand()) / (<double>RAND_MAX) * 2 - 1
+                #R[i] = (<double>rand()) / (<double>RAND_MAX) * 2 - 1
+
+                # These are faster and it still sounds like white noise.
+                L[i] = 1 if (rand() > RAND_MAX / 2) else -1
+                R[i] = 1 if (rand() > RAND_MAX / 2) else -1
+        else:
+            for i in range(BUFFER_SIZE):
+                #L[i] = (<double>rand()) / (<double>RAND_MAX) * 2 - 1
+                L[i] = 1 if (rand() > RAND_MAX / 2) else -1
 
         buf.length = BUFFER_SIZE
         buf.has_more = True

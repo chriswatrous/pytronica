@@ -182,6 +182,12 @@ class Tests(unittest.TestCase):
         c.add(Saw(220, 2*Sine(4)).take(1), 1)
         compare_outputs(c, 'outputs/variable_saw.wav')
 
+    def test_noise(self):
+        # Nosie generates a different output each time, so we can't compare to a saved output.
+        a = Noise(stereo=True).take(1)
+        a.measure_rate()
+        #a.play()
+
 
 class ErrorTests(unittest.TestCase):
     def test_operator_errors(self):

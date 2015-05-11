@@ -19,9 +19,10 @@ def main():
 # Tests ------------------------------------------------------
 
 def measure_osc():
-    measure('Saw(220).take(360)', 20)
+    #measure('Saw(220).take(360)', 20)
     #measure('Sine(220).take(360)', 20)
-    measure('Saw(Const(220)).take(80)', 20)
+    #measure('Saw(Const(220)).take(80)', 20)
+    measure('Noise(stereo=False).take(100)', 20)
 
 
 def measure_stuff():

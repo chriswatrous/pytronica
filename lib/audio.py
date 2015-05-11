@@ -15,4 +15,4 @@ from combiners import Layer
 from envelopes import ExpDecay, LinearDecay
 from compose import Compose, Chain
 from misc import Silence, NoOp, Const
-from osc import Saw, Sine
+from osc import Saw, Sine, Noise
