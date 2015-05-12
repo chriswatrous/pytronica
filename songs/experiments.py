@@ -91,7 +91,7 @@ def vibrato():
     a *= .2
     a.play()
     #a.audacity()
-vibrato()
+#vibrato()
 
 def aliasing():
     c = Controller(5000)
@@ -143,3 +143,49 @@ def bass_drum():
     c.play()
     #c.audacity()
 #bass_drum()
+
+def multi_saw_experiment():
+    #osc = Saw
+    #osc = multi_saw([1, 0], [-1, .50])
+    #osc = multi_saw([1, 0], [-1, .25])
+    #osc = multi_saw([1, 0], [-1, .25], [1, .55])
+    #osc = multi_saw([1, 0], [-1, .25], [1, .50])
+    #osc = multi_saw([1, 0], [-1, .25], [1, .55])
+    #osc = multi_saw([1, 0], [-1, .25], [1, .50], [1, .7])
+    #osc = multi_saw([1, 0], [-1, .25], [1, .50], [1, .65]) # good
+    #osc = multi_saw([1, 0], [-1, .25], [1, .50], [1, .6])
+    #osc = multi_saw([1, 0], [-.5, .25], [1, .50], [1, .6])
+    #osc = multi_saw([1.0, .00], [1.0, .30], [1.0, .70])
+    #osc = multi_saw([1.0, .00], [1.0, .20], [1.0, .40])
+    osc = multi_saw([1.0, .00], [1.0, .25], [1.0, .50]) # good
+
+    def osc1(p):
+        #return pitch_spread(p, osc, voices = 5, stereo_spread=1, random_phase=.5)
+        #return pitch_spread(p, osc, voices = 4, spread=.1, stereo_spread=1, random_phase=1)
+        #return pitch_spread(p, osc, voices = 5, spread=.15, stereo_spread=1, random_phase=1)
+        #return pitch_spread(p, osc, voices = 5, spread=.20, stereo_spread=1, random_phase=1)
+        return pitch_spread(p, osc, voices = 5, spread=.15, stereo_spread=1, random_phase=0.10)
+        #return pitch_spread(p, osc, voices = 5, spread=.15, stereo_spread=1, random_phase=0.05)
+        #return pitch_spread(p, osc, voices = 5, spread=.15, stereo_spread=1, random_phase=0.00)
+
+    def chord(s):
+        a = Layer()
+        for p in notes(s):
+            a.add(osc1(p))
+        return a
+
+    #(.05*chord('Gb3 Bb3 Db4 F4 Ab4')).playx()
+    step = 2
+
+    a = Chain()
+    a.add(chord('Gb3 Bb3 Db4 F4 Ab4').take(step), step)
+    a.add(chord('Eb3 G3 Bb3 D4 F4').take(step), step)
+    a.add(chord('Db3 F3 Ab3 C4 Eb4').take(step), step)
+    a.add(chord('E3 Ab3 B3 Eb4 Gb4').take(step), step)
+
+    a = Chain([a]*1000)
+
+    a *= .05
+    a.play()
+    #a.audacity()
+multi_saw_experiment()
