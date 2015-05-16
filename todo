@@ -1,12 +1,13 @@
 Oscillators:
-    Square
     Triangle
-    White Noise
     Quality Saw
     Quality Square
     Quality Triangle
     Prophet 5 style triggered sawtooth
     faster sine algorithm
+    Wavetable
+    ImpulseTrain
+    SyncTrain
 Synthesizers:
     basic subtractive (standard analog modeling)
     additive
@@ -19,7 +20,7 @@ Synthesizers:
 Envelopes:
     AR
     others
-    arbitrary control signal
+    ADSR
     ExpLinDecay:
         x[n] = a*x[n-1] - b
         OR
@@ -28,11 +29,6 @@ Envelopes:
         x[n] = w[n] + w[n]
     explore recurance relations to see what curves I can produce
 Modifiers:
-    Add
-    MulAdd
-    Take
-    MemoryDelay
-    ProcessDelay
     Convolution
     Reverb (algorithmic)
     Interpolating Delay
@@ -43,12 +39,14 @@ Modifiers:
         Clip
         SinShape
         Saturate
+        Quantize
 Filters:
     1 pole low pass
     1 pole high pass
     2 pole low pass
     2 pole band pass
     2 pole high pass
+    Integrate
     maybe biquad, which could be used to create any other type of filter
     parametric EQ
     filters that can take signals as their input parameters
@@ -80,3 +78,4 @@ build pytronica into a single .so file using setup.py
 Generator.fft() that uses GNU octave to display a fft graph of the sound
 Generator.left() and Generator.right() that would get the left or right channels of a stereo sound
 all local variables that should be int, long, double need to have type declarations
+saw optimization: only do mod if value is out of range
