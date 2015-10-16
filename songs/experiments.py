@@ -3,9 +3,7 @@ from __future__ import division
 
 from random import random
 
-import sys
-sys.path.append('../lib')
-from audio import *
+from pytronica import *
 
 
 def saw(p):
