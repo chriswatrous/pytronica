@@ -9,10 +9,11 @@ from audio import *
 reps = 4
 step = 20
 
-# chord track ---------------------------------------------------------------------------------
+# chord track -----------------------------------------------------------------
 def osc1(p, r):
     o = multi_saw([1.0, .00], [0.5, .125], [1.0, .25], [1.0, .50])
-    return pitch_spread(p, o, voices = 5, spread=.15, stereo_spread=1, random_phase=r).drop(.1)
+    return pitch_spread(p, o, voices = 5, spread=.15, stereo_spread=1,
+                        random_phase=r).drop(.1)
 
 def chord(s, r):
     a = Layer()
@@ -42,10 +43,11 @@ for _ in range(reps):
 chord_track = c * m
 
 
-# bass track ----------------------------------------------------------------------------------
+# bass track ------------------------------------------------------------------
 def osc2(p):
     o = multi_saw([1, 0], [-1, .25], [1, .50], [1, .7])
-    o = pitch_spread(p, o, voices = 5, spread=.15, stereo_spread=1, random_phase=1)
+    o = pitch_spread(p, o, voices = 5, spread=.15, stereo_spread=1,
+                     random_phase=1)
     o += 0.5 * Sine(p2f(p))
     return o
 
@@ -56,7 +58,7 @@ for p in notes('G1 Bb1 A1 D2'):
 bass_track = Chain([c]*reps)
 
 
-# whole song ----------------------------------------------------------------------------------
+# whole song ------------------------------------------------------------------
 # volume envelope for whole song
 c = Controller(0)
 c.lineto(step, 1)
@@ -67,4 +69,5 @@ a = chord_track + bass_track
 a *= c
 a *= .05
 a.play()
-#a.audacity()
+# a.audacity()
+# a.wav_write('ambient1.wav')
