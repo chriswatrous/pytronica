@@ -1,5 +1,5 @@
 #!python
-#cython cdivision=True
+#cython cdivision=True 
 from __future__ import division
 
 from math import sin, cos, pi

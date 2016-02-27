@@ -3,10 +3,11 @@ from __future__ import division
 from collections import deque
 from random import random
 
-from osc import Saw, Sine
-from util import f_range, p2f
-from compose import Compose, Chain
-from combiners import Layer
+from pytronica.osc import Saw, Sine
+from pytronica.util import f_range, p2f
+from pytronica.compose import Compose, Chain
+from pytronica.combiners import Layer
+
 
 def psaw(p, *args, **kwargs):
     return Saw(p2f(p), *args, **kwargs)
