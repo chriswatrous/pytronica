@@ -78,7 +78,7 @@ def note_freq(s):
 
 
 def note_freqs(s):
-    return map(p2f, notes(s))
+    return [p2f(x) for x in notes(s)]
 
 
 def f_range(start, end, count):

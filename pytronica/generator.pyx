@@ -156,15 +156,22 @@ cdef class Generator:
         self._clip_max = 0
         stereo = self.is_stereo()
 
+        player_proc = None
         try:
             # Make the FIFO.
-            fifo_name = '/tmp/fifo-' + str(randrange(1e9))
+            fifo_name = ('/tmp/fifo-' + str(randrange(1e9))).encode()
             call(['mkfifo', fifo_name])
 
             # Start aplay.
             channels = '2' if stereo else '1'
-            cmd = ['aplay', '-f', 'S16_LE', '-c', channels, '-r', str(int(self.sample_rate)), fifo_name]
-            player_proc = Popen(cmd)
+
+            player_proc = Popen([
+                'aplay',
+                '-f', 'S16_LE',
+                '-c', channels,
+                '-r', str(int(self.sample_rate)),
+                fifo_name,
+            ])
 
             # The FIFO must be opened after aplay is started.
             fifo = fopen(fifo_name, 'w')
@@ -178,7 +185,7 @@ cdef class Generator:
             # Run even if the user kills with ^C.
             # FIXME This part is not working now for some reason. The code never gets called. I thought
             # it was working earlier.
-            if player_proc.poll == None:
+            if player_proc and player_proc.poll() == None:
                 player_proc.terminate()
             call(['rm', fifo_name])
 

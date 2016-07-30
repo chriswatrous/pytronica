@@ -59,6 +59,7 @@ cdef class Take(Generator):
     def __cinit__(self, Generator input, length):
         self._input_iter = input.get_iter()
         self._samples_left = <long>(length * self.sample_rate)
+        self.mlength = length
 
     cdef bint is_stereo(self) except -1:
         return self._input_iter.generator.is_stereo()

@@ -33,7 +33,7 @@ cdef class Compose(Generator):
 
         if inputs:
             for x in inputs:
-                self.add(x)
+                self.add(*x)
 
     def add(self, Generator generator, delay):
         self._inputs.append((generator.get_iter(), delay))
@@ -141,8 +141,9 @@ cdef class Compose(Generator):
 
 
 cdef class Chain(Compose):
-    def __init__(self, inputs=None):
+    def __init__(self, inputs=None, start_offset=0):
         Compose.__init__(self)
+        self.mlength = start_offset
         if inputs:
             for x in inputs:
                 self.add(x)

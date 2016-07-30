@@ -21,7 +21,8 @@ cdef class Layer(Generator):
         self.inputs = []
         self.C = 0
         if inputs:
-            map(self.add, inputs)
+            for x in inputs:
+                self.add(x)
 
     def add(self, input):
         cdef Generator gen
@@ -154,7 +155,12 @@ cdef class Multiply(Generator):
     def __init__(self, Generator a, Generator b):
         self.A = a.get_iter()
         self.B = b.get_iter()
-        self.mlength = dmin(a.mlength, b.mlength)
+        if a.mlength == 0:
+            self.mlength = b.mlength
+        elif b.mlength == 0:
+            self.mlength = a.mlength
+        else:
+            self.mlength = dmin(a.mlength, b.mlength)
 
     cdef bint is_stereo(self) except -1:
         return self.A.generator.is_stereo() or self.B.generator.is_stereo()
